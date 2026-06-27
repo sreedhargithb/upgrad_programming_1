@@ -1,0 +1,2 @@
+- MLOps – NLP - Case Study: Sreedhar K
+  - https://cdn.upgrad.com/uploads/production/7d0904e9-413e-46bd-b29f-2fcfbe67ca69/MLOps_NLP_Assignment_SreedharK.pdf
