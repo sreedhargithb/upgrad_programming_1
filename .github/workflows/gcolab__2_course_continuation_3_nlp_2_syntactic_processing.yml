@@ -1,0 +1,81 @@
+name: "gcolab // 2_Course_continuation/_3_NLP/_2_Syntactic_processing"
+
+on:
+  workflow_dispatch:
+
+jobs:
+  run-notebooks:
+    runs-on: ubuntu-latest
+    timeout-minutes: 350
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python 3.13
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.13'
+
+      - name: Install Google Colab CLI
+        run: pip install git+https://github.com/googlecolab/google-colab-cli
+
+      - name: Create Patched Colab Wrapper
+        run: |
+          cat << 'EOF' > colab_patched.py
+          import sys
+          import jupyter_kernel_client.wsclient
+
+          orig_recv_reply = jupyter_kernel_client.wsclient.KernelWebSocketClient._recv_reply
+          def patched_recv_reply(self, msg_id, timeout=None):
+              return orig_recv_reply(self, msg_id, timeout=None)
+          jupyter_kernel_client.wsclient.KernelWebSocketClient._recv_reply = patched_recv_reply
+
+          from colab_cli.cli import main
+          if __name__ == '__main__':
+              main()
+          EOF
+
+      - name: Restore Headless Google ADC Credentials
+        run: |
+          mkdir -p ~/.config/gcloud
+          echo '${{ secrets.GCP_ADC_JSON }}' > ~/.config/gcloud/application_default_credentials.json
+        shell: bash
+
+      - name: Provision Colab session (free T4 GPU)
+        run: python colab_patched.py --auth adc new -s github_job --gpu T4
+
+      - name: Run notebooks on Colab
+        shell: bash
+        run: |
+          mkdir -p artifacts
+          set +e
+          failed=0
+          notebooks=(
+            "2_Course_continuation/_3_NLP/_2_Syntactic_processing/_0_readme_(Google_colab).ipynb"
+          )
+          for nb in "${notebooks[@]}"; do
+            echo "================================================================"
+            echo "RUNNING: $nb"
+            echo "================================================================"
+            python colab_patched.py --auth adc exec -s github_job -f "$nb"
+            rc=$?
+            if [ $rc -ne 0 ]; then
+              echo "::warning::Notebook FAILED (rc=$rc): $nb"
+              failed=$((failed+1))
+            fi
+            safe=$(echo "$nb" | sed 's#[/ ()+]#_#g' | sed 's#\.ipynb$##')
+            python colab_patched.py --auth adc download -s github_job /content/outputs.zip "artifacts/${safe}_outputs.zip" || true
+            cp "$nb" "artifacts/${safe}_executed.ipynb" || true
+          done
+          echo "Finished. Failed count: $failed"
+
+      - name: Upload artifacts
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: gcolab-2_course_continuation_3_nlp_2_syntactic_processing
+          path: artifacts/
+
+      - name: Hard Shutdown Cleanup
+        if: always()
+        run: python colab_patched.py --auth adc stop -s github_job
