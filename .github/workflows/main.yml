@@ -1,9 +1,6 @@
 name: Run Jupyter Notebook and Generate HTML
 
 on:
-  push:
-    branches:
-      - main
   workflow_dispatch:
 
 jobs:
