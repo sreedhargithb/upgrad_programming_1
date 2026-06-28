@@ -65,7 +65,8 @@ jobs:
             if [ $rc -ne 0 ]; then
               echo "::warning::Notebook FAILED (rc=$rc): $nb"
               failed=$((failed+1))
-            fi            safe=$(echo "$nb" | sed 's#[/ ()+]#_#g' | sed 's#\.ipynb$##')
+            fi
+            safe=$(echo "$nb" | sed 's#[/ ()+]#_#g' | sed 's#\.ipynb$##')
             
             # The CLI automatically downloads the executed notebook locally
             local_output="${nb%.ipynb}_output.ipynb"
@@ -79,7 +80,8 @@ jobs:
             
             # Download outputs folder containing any generated files from execution
             echo "Downloading outputs folder from Colab..."
-            python colab_patched.py --auth adc download -s github_job /content/outputs.zip "artifacts/${safe}_outputs.zip" 2>/dev/null || truedone
+            python colab_patched.py --auth adc download -s github_job /content/outputs.zip "artifacts/${safe}_outputs.zip" 2>/dev/null || true
+          done
           echo "Finished. Failed count: $failed"
 
       - name: Upload artifacts
