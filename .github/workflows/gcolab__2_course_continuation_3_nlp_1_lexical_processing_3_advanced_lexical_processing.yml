@@ -65,18 +65,21 @@ jobs:
             if [ $rc -ne 0 ]; then
               echo "::warning::Notebook FAILED (rc=$rc): $nb"
               failed=$((failed+1))
-            fi
-            safe=$(echo "$nb" | sed 's#[/ ()+]#_#g' | sed 's#\.ipynb$##')
-            # Try to download the executed notebook that Colab saved with _output suffix
-            # Colab saves executed notebooks in the same directory with _output.ipynb suffix
-            nb_no_ext="${nb%.ipynb}"
-            echo "Attempting to download executed notebook from Colab..."
-            python colab_patched.py --auth adc download -s github_job "/content/${nb_no_ext}_output.ipynb" "artifacts/${safe}_executed.ipynb" 2>/dev/null || cp "$nb" "artifacts/${safe}_executed.ipynb"
+            fi            safe=$(echo "$nb" | sed 's#[/ ()+]#_#g' | sed 's#\.ipynb$##')
             
-            # Download outputs folder (contains any generated files from execution)
+            # The CLI automatically downloads the executed notebook locally
+            local_output="${nb%.ipynb}_output.ipynb"
+            echo "Moving locally saved executed notebook to artifacts..."
+            if [ -f "$local_output" ]; then
+              mv "$local_output" "artifacts/${safe}_executed.ipynb"
+            else
+              echo "::warning::Executed notebook not found locally, falling back to original."
+              cp "$nb" "artifacts/${safe}_executed.ipynb"
+            fi
+            
+            # Download outputs folder containing any generated files from execution
             echo "Downloading outputs folder from Colab..."
-            python colab_patched.py --auth adc download -s github_job /content/outputs.zip "artifacts/${safe}_outputs.zip" 2>/dev/null || true
-          done
+            python colab_patched.py --auth adc download -s github_job /content/outputs.zip "artifacts/${safe}_outputs.zip" 2>/dev/null || truedone
           echo "Finished. Failed count: $failed"
 
       - name: Upload artifacts
