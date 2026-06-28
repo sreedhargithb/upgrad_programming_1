@@ -71,37 +71,15 @@ jobs:
               failed=$((failed+1))
             fi
             safe=$(echo "$nb" | sed 's#[/ ()+]#_#g' | sed 's#\.ipynb$##')
+            # Try to download the executed notebook that Colab saved with _output suffix
+            # Colab saves executed notebooks in the same directory with _output.ipynb suffix
             nb_no_ext="${nb%.ipynb}"
+            echo "Attempting to download executed notebook from Colab..."
+            python colab_patched.py --auth adc download -s github_job "/content/${nb_no_ext}_output.ipynb" "artifacts/${safe}_executed.ipynb" 2>/dev/null || cp "$nb" "artifacts/${safe}_executed.ipynb"
             
-            # Export executed notebook from Colab to /content/outputs/ for download
-            python colab_patched.py --auth adc exec -s github_job -c "
-import shutil
-import os
-import subprocess
-
-# Try to get the executed notebook and save it to outputs folder
-try:
-    # The executed notebook is typically saved in the working directory
-    nb_path = '${nb}'
-    output_dir = '/content/outputs'
-    os.makedirs(output_dir, exist_ok=True)
-    
-    # Export notebook with outputs (if available in notebook object)
-    try:
-        subprocess.run(['jupyter', 'nbconvert', '--to', 'notebook', '--output', f'{output_dir}/executed_notebook.ipynb', nb_path], timeout=30)
-    except:
-        pass
-    
-    print(f'Exported notebook to {output_dir}/')
-except Exception as e:
-    print(f'Export note: {e}')
-" 2>/dev/null || true
-            
-            # Download outputs folder (contains executed notebook and any generated files)
+            # Download outputs folder (contains any generated files from execution)
+            echo "Downloading outputs folder from Colab..."
             python colab_patched.py --auth adc download -s github_job /content/outputs.zip "artifacts/${safe}_outputs.zip" 2>/dev/null || true
-            
-            # Fallback: copy original notebook structure for reference
-            cp "$nb" "artifacts/${safe}_executed.ipynb"
           done
           echo "Finished. Failed count: $failed"
 
