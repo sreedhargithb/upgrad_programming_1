@@ -77,7 +77,12 @@ jobs:
               cp "$nb" "artifacts/${safe}_executed.ipynb"
             fi
             
-            # Download outputs folder containing any generated files from execution
+            # Change: Extract just the filename to keep the artifact name short
+            nb_filename=$(basename "$nb" .ipynb)
+            safe="${nb_filename// /_}"
+            
+            # Now the artifact will be named: [filename]_outputs.zip
+            # Example: 1_1_ML_C41_Python_Crash_Course_outputs.zip
             echo "Downloading outputs folder from Colab..."
             python colab_patched.py --auth adc download -s github_job /content/outputs.zip "artifacts/${safe}_outputs.zip" 2>/dev/null || true
           done
