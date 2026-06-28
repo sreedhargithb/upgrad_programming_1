@@ -64,8 +64,11 @@ jobs:
               failed=$((failed+1))
             fi
             safe=$(echo "$nb" | sed 's#[/ ()+]#_#g' | sed 's#\.ipynb$##')
-            python colab_patched.py --auth adc download -s github_job /content/outputs.zip "artifacts/${safe}_outputs.zip" || true
-            cp "$nb" "artifacts/${safe}_executed.ipynb" || true
+            nb_basename=$(basename "$nb")
+            # Download executed notebook from Colab
+            python colab_patched.py --auth adc download -s github_job "/content/$nb_basename" "artifacts/${safe}_executed.ipynb" 2>/dev/null || cp "$nb" "artifacts/${safe}_executed.ipynb"
+            # Download outputs folder
+            python colab_patched.py --auth adc download -s github_job /content/outputs.zip "artifacts/${safe}_outputs.zip" 2>/dev/null || true
           done
           echo "Finished. Failed count: $failed"
 
