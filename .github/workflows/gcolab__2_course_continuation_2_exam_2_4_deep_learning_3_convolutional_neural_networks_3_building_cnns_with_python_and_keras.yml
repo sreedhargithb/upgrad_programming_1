@@ -71,9 +71,9 @@ jobs:
               failed=$((failed+1))
             fi
             safe=$(echo "$nb" | sed 's#[/ ()+]#_#g' | sed 's#\.ipynb$##')
-            nb_no_ext="${nb%.ipynb}"
-            # Download executed notebook from Colab (with _output suffix that Colab adds, preserving full path)
-            python colab_patched.py --auth adc download -s github_job "/content/${nb_no_ext}_output.ipynb" "artifacts/${safe}_executed.ipynb" 2>/dev/null || cp "$nb" "artifacts/${safe}_executed.ipynb"
+            # Note: Colab saves executed notebook with _output suffix but path issues with download
+            # Fallback: copy original notebook (outputs.zip contains execution results)
+            cp "$nb" "artifacts/${safe}_executed.ipynb"
             # Download outputs folder
             python colab_patched.py --auth adc download -s github_job /content/outputs.zip "artifacts/${safe}_outputs.zip" 2>/dev/null || true
           done
