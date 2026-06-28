@@ -69,11 +69,37 @@ jobs:
               failed=$((failed+1))
             fi
             safe=$(echo "$nb" | sed 's#[/ ()+]#_#g' | sed 's#\.ipynb$##')
-            # Note: Colab saves executed notebook with _output suffix but path issues with download
-            # Fallback: copy original notebook (outputs.zip contains execution results)
-            cp "$nb" "artifacts/${safe}_executed.ipynb"
-            # Download outputs folder
+            nb_no_ext="${nb%.ipynb}"
+            
+            # Export executed notebook from Colab to /content/outputs/ for download
+            python colab_patched.py --auth adc exec -s github_job -c "
+import shutil
+import os
+import subprocess
+
+# Try to get the executed notebook and save it to outputs folder
+try:
+    # The executed notebook is typically saved in the working directory
+    nb_path = '${nb}'
+    output_dir = '/content/outputs'
+    os.makedirs(output_dir, exist_ok=True)
+    
+    # Export notebook with outputs (if available in notebook object)
+    try:
+        subprocess.run(['jupyter', 'nbconvert', '--to', 'notebook', '--output', f'{output_dir}/executed_notebook.ipynb', nb_path], timeout=30)
+    except:
+        pass
+    
+    print(f'Exported notebook to {output_dir}/')
+except Exception as e:
+    print(f'Export note: {e}')
+" 2>/dev/null || true
+            
+            # Download outputs folder (contains executed notebook and any generated files)
             python colab_patched.py --auth adc download -s github_job /content/outputs.zip "artifacts/${safe}_outputs.zip" 2>/dev/null || true
+            
+            # Fallback: copy original notebook structure for reference
+            cp "$nb" "artifacts/${safe}_executed.ipynb"
           done
           echo "Finished. Failed count: $failed"
 
