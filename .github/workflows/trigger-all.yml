@@ -1,4 +1,4 @@
-name: Trigger All Workflows
+name: Trigger All Workflows Sequentially
 
 on:
   workflow_dispatch:
@@ -7,7 +7,7 @@ jobs:
   trigger-all-workflows:
     runs-on: ubuntu-latest
     steps:
-      - name: Run GitHub CLI loop to trigger workflows
+      - name: Run GitHub CLI loop to trigger workflows sequentially
         env:
           GH_TOKEN: ${{ secrets.TRIGGER_WORKFLOWS_PAT }}
         run: |
@@ -15,7 +15,6 @@ jobs:
           REPO="${{ github.repository }}"
           echo "Fetching all active workflows for $REPO..."
           
-          # Added -R "$REPO" so gh knows exactly which repository to query
           workflows=$(gh workflow list -R "$REPO" --json id,name,state --limit 100)
           
           echo "$workflows" | jq -c '.[]' | while read -r row; do
@@ -24,9 +23,37 @@ jobs:
             state=$(echo "$row" | jq -r '.state')
             
             if [ "$state" = "active" ] && [ "$name" != "$CURRENT_WORKFLOW" ]; then
-              echo "🚀 Attempting to trigger: $name (ID: $id)"
+              echo "------------------------------------------------------"
+              echo "🚀 Launching: $name (ID: $id)"
               
-              # Added -R "$REPO" here as well to execute the trigger target safely
-              gh workflow run "$id" -R "$REPO" || echo "⚠️ Skipped $name (likely missing workflow_dispatch)"
+              # 1. Trigger the workflow. If it fails to trigger, skip to next.
+              if ! gh workflow run "$id" -R "$REPO"; then
+                echo "⚠️ Skipped $name (likely missing workflow_dispatch)"
+                continue
+              fi
+              
+              # 2. Give the GitHub API a few seconds to spin up the new run
+              sleep 5
+              
+              # 3. Fetch the newly created Run ID (looks for active/queued status first)
+              RUN_ID=$(gh run list -R "$REPO" -w "$id" --limit 5 --json databaseId,status --jq '.[] | select(.status != "completed") | .databaseId' | head -n 1)
+              
+              # Fallback: If it finished instantly or wasn't caught above, grab the absolute latest run
+              if [ -z "$RUN_ID" ] || [ "$RUN_ID" = "null" ]; then
+                RUN_ID=$(gh run list -R "$REPO" -w "$id" --limit 1 --json databaseId --jq '.[0].databaseId')
+              fi
+              
+              # 4. Wait for the run to complete
+              if [ -n "$RUN_ID" ] && [ "$RUN_ID" != "null" ]; then
+                echo "⏳ Tracking Run ID $RUN_ID. Waiting for completion..."
+                
+                # 'gh run watch' blocks the script until the run finishes.
+                # Because we don't use '--exit-status', it won't crash this job if the target workflow fails.
+                gh run watch "$RUN_ID" -R "$REPO"
+                
+                echo "✅ Run $RUN_ID finished. Moving to the next workflow."
+              else
+                echo "⚠️ Could not track the Run ID for $name. Moving on to avoid getting stuck."
+              fi
             fi
           done
