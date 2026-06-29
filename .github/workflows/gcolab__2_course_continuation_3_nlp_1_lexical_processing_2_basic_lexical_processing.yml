@@ -53,7 +53,7 @@ jobs:
             fi
           done
 
-      - name: Run notebooks in parallel batches of 3
+      - name: Run notebooks sequentially (ADC rotated per notebook)
         shell: bash
         run: |
           mkdir -p artifacts logs
@@ -140,60 +140,32 @@ jobs:
             return 0
           }
 
-          # ----- Batch driver -----
+          # ----- Sequential driver (one notebook at a time, ADC rotated per notebook) -----
           total=${#entries[@]}
-          batch_size=3
           failed=0
-          batch_no=0
-          i=0
-          while [ $i -lt $total ]; do
-            batch_no=$((batch_no+1))
+          idx=0
+          while [ $idx -lt $total ]; do
+            entry="${entries[$idx]}"
+            nb="${entry%%|*}"
+            profile="${entry##*|}"
+            # Rotate ADC slot 1 -> 2 -> 3 -> 1 -> ... across notebooks
+            slot=$(( (idx % 3) + 1 ))
+            safe=$(echo "$nb" | sed 's#[/ ()+]#_#g' | sed 's#\.ipynb$##')
+            logfile="logs/nb$((idx+1))_slot${slot}_${safe}.log"
+
             echo ""
             echo "################################################################"
-            echo "# BATCH $batch_no  (notebooks $((i+1)) .. $((i+batch_size<total?i+batch_size:total)) / $total)"
+            echo "# NOTEBOOK $((idx+1)) / $total   adc=$slot   profile=$profile"
+            echo "# $nb"
             echo "################################################################"
 
-            pids=()
-            slots=()
-            logs=()
-            nbs=()
-            for slot in 1 2 3; do
-              idx=$((i + slot - 1))
-              [ $idx -ge $total ] && break
-              entry="${entries[$idx]}"
-              nb="${entry%%|*}"
-              profile="${entry##*|}"
-              safe=$(echo "$nb" | sed 's#[/ ()+]#_#g' | sed 's#\.ipynb$##')
-              logfile="logs/batch${batch_no}_slot${slot}_${safe}.log"
-
-              echo "[batch $batch_no slot $slot] LAUNCH adc=$slot profile=$profile  $nb"
-
-              (
-                run_one "$nb" "$profile" "$slot" "$logfile"
-              ) > "$logfile" 2>&1 &
-              pids+=($!)
-              slots+=($slot)
-              logs+=("$logfile")
-              nbs+=("$nb")
-            done
-
-            # Wait for all slots in this batch
-            k=0
-            for pid in "${pids[@]}"; do
-              if ! wait "$pid"; then
-                failed=$((failed+1))
-              fi
-              k=$((k+1))
-            done
-
-            # Dump per-slot logs in order so output is readable
-            for k in "${!logs[@]}"; do
-              echo ""
-              echo "----- [batch $batch_no slot ${slots[$k]}] ${nbs[$k]} -----"
-              cat "${logs[$k]}"
-            done
-
-            i=$((i + batch_size))
+            run_one "$nb" "$profile" "$slot" "$logfile" > "$logfile" 2>&1
+            rc=$?
+            cat "$logfile"
+            if [ $rc -ne 0 ]; then
+              failed=$((failed+1))
+            fi
+            idx=$((idx+1))
           done
 
           echo ""
