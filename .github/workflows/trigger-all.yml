@@ -1,59 +1,138 @@
-name: Trigger All Workflows Sequentially
+name: Trigger All Workflows In Parallel Batches
 
 on:
   workflow_dispatch:
+    inputs:
+      batch_size:
+        description: 'How many child workflows to launch in parallel per batch'
+        required: false
+        default: '3'
+      wait_between_batches_seconds:
+        description: 'Seconds to wait between launching batches (lets GitHub register the runs)'
+        required: false
+        default: '15'
 
 jobs:
   trigger-all-workflows:
     runs-on: ubuntu-latest
+    timeout-minutes: 60
     steps:
-      - name: Run GitHub CLI loop to trigger workflows sequentially
+      - name: Sanity-check PAT token
         env:
           GH_TOKEN: ${{ secrets.TRIGGER_WORKFLOWS_PAT }}
+        shell: bash
         run: |
+          set +e
+          echo "Verifying TRIGGER_WORKFLOWS_PAT can call the GitHub API..."
+          gh api user --jq '.login' || {
+            echo "::error::TRIGGER_WORKFLOWS_PAT is invalid/expired. Update the repo secret and retry."
+            exit 1
+          }
+          echo "Verifying token can list workflows in $GITHUB_REPOSITORY..."
+          gh workflow list -R "$GITHUB_REPOSITORY" --limit 1 >/dev/null || {
+            echo "::error::Token works for /user but lacks repo Actions:read on $GITHUB_REPOSITORY."
+            exit 1
+          }
+          echo "OK"
+
+      - name: Trigger all child workflows in parallel batches
+        env:
+          GH_TOKEN: ${{ secrets.TRIGGER_WORKFLOWS_PAT }}
+          BATCH_SIZE: ${{ github.event.inputs.batch_size }}
+          WAIT_SECS:  ${{ github.event.inputs.wait_between_batches_seconds }}
+        shell: bash
+        run: |
+          set -uo pipefail
           CURRENT_WORKFLOW="${{ github.workflow }}"
-          REPO="${{ github.repository }}"
-          echo "Fetching all active workflows for $REPO..."
-          
-          workflows=$(gh workflow list -R "$REPO" --json id,name,state --limit 100)
-          
-          echo "$workflows" | jq -c '.[]' | while read -r row; do
-            id=$(echo "$row" | jq -r '.id')
-            name=$(echo "$row" | jq -r '.name')
-            state=$(echo "$row" | jq -r '.state')
-            
-            if [ "$state" = "active" ] && [ "$name" != "$CURRENT_WORKFLOW" ]; then
-              echo "------------------------------------------------------"
-              echo "🚀 Launching: $name (ID: $id)"
-              
-              # 1. Trigger the workflow. If it fails to trigger, skip to next.
-              if ! gh workflow run "$id" -R "$REPO"; then
-                echo "⚠️ Skipped $name (likely missing workflow_dispatch)"
-                continue
-              fi
-              
-              # 2. Give the GitHub API a few seconds to spin up the new run
-              sleep 5
-              
-              # 3. Fetch the newly created Run ID (looks for active/queued status first)
-              RUN_ID=$(gh run list -R "$REPO" -w "$id" --limit 5 --json databaseId,status --jq '.[] | select(.status != "completed") | .databaseId' | head -n 1)
-              
-              # Fallback: If it finished instantly or wasn't caught above, grab the absolute latest run
-              if [ -z "$RUN_ID" ] || [ "$RUN_ID" = "null" ]; then
-                RUN_ID=$(gh run list -R "$REPO" -w "$id" --limit 1 --json databaseId --jq '.[0].databaseId')
-              fi
-              
-              # 4. Wait for the run to complete
-              if [ -n "$RUN_ID" ] && [ "$RUN_ID" != "null" ]; then
-                echo "⏳ Tracking Run ID $RUN_ID. Waiting for completion..."
-                
-                # 'gh run watch' blocks the script until the run finishes.
-                # Because we don't use '--exit-status', it won't crash this job if the target workflow fails.
-                gh run watch "$RUN_ID" -R "$REPO"
-                
-                echo "✅ Run $RUN_ID finished. Moving to the next workflow."
-              else
-                echo "⚠️ Could not track the Run ID for $name. Moving on to avoid getting stuck."
-              fi
+          REPO="$GITHUB_REPOSITORY"
+          BATCH_SIZE="${BATCH_SIZE:-3}"
+          WAIT_SECS="${WAIT_SECS:-15}"
+          echo "Repo:           $REPO"
+          echo "Self workflow:  $CURRENT_WORKFLOW"
+          echo "Batch size:     $BATCH_SIZE"
+          echo "Wait/batch:     ${WAIT_SECS}s"
+          echo ""
+
+          # Collect every active, non-self workflow
+          mapfile -t rows < <(gh workflow list -R "$REPO" --json id,name,state --limit 200 \
+              | jq -c --arg cur "$CURRENT_WORKFLOW" \
+                    '.[] | select(.state=="active" and .name!=$cur)')
+
+          ids=()
+          names=()
+          for row in "${rows[@]}"; do
+            ids+=("$(echo "$row"   | jq -r '.id')")
+            names+=("$(echo "$row" | jq -r '.name')")
+          done
+          total=${#ids[@]}
+          if [ "$total" -eq 0 ]; then
+            echo "No active sibling workflows found. Nothing to do."
+            exit 0
+          fi
+          echo "Found $total workflows. Launching in batches of $BATCH_SIZE..."
+          echo ""
+
+          # --- launch one workflow; ALWAYS exit 0 so one bad row never kills the loop ---
+          fire_one() {
+            local id="$1"
+            local name="$2"
+            local label="$3"
+            # 2>&1 captures both stderr and stdout from gh
+            local out
+            if out=$(gh workflow run "$id" -R "$REPO" 2>&1); then
+              echo "[$label] OK      ->  $name (id=$id)"
+            else
+              echo "[$label] SKIPPED ->  $name (id=$id)"
+              echo "[$label]           reason: $out"
+            fi
+            return 0
+          }
+
+          launched=0
+          batch_no=0
+          i=0
+          while [ "$i" -lt "$total" ]; do
+            batch_no=$((batch_no+1))
+            end=$(( i + BATCH_SIZE ))
+            [ "$end" -gt "$total" ] && end=$total
+            echo "================================================================"
+            echo "BATCH $batch_no  (workflows $((i+1))..$end of $total)"
+            echo "================================================================"
+
+            pids=()
+            for j in $(seq "$i" $((end-1))); do
+              label="batch${batch_no}/slot$((j - i + 1))"
+              fire_one "${ids[$j]}" "${names[$j]}" "$label" &
+              pids+=($!)
+            done
+            for pid in "${pids[@]}"; do
+              wait "$pid" || true
+              launched=$((launched+1))
+            done
+
+            i=$end
+            if [ "$i" -lt "$total" ]; then
+              echo "(sleeping ${WAIT_SECS}s before next batch to let GitHub register runs)"
+              sleep "$WAIT_SECS"
             fi
           done
+
+          echo ""
+          echo "================================================================"
+          echo "Launched $launched / $total workflows."
+          echo "Children run independently from here -- this driver does NOT"
+          echo "wait for them to finish. Check the Actions tab for live status."
+          echo "================================================================"
+
+      - name: Summary of recently launched runs
+        if: always()
+        env:
+          GH_TOKEN: ${{ secrets.TRIGGER_WORKFLOWS_PAT }}
+        shell: bash
+        run: |
+          set +e
+          echo "Most recent 30 runs in this repo:"
+          gh run list -R "$GITHUB_REPOSITORY" --limit 30 \
+            --json displayTitle,status,conclusion,createdAt,workflowName \
+            --jq '.[] | [.createdAt, .status, (.conclusion // "-"), .workflowName] | @tsv' \
+            | column -t -s $'\t' || true
