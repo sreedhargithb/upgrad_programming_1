@@ -35,66 +35,173 @@ jobs:
               main()
           EOF
 
-      - name: Restore Headless Google ADC Credentials
+      - name: Restore 3 Google ADC credentials
+        shell: bash
+        env:
+          GCP_ADC_JSON1: ${{ secrets.GCP_ADC_JSON1 }}
+          GCP_ADC_JSON2: ${{ secrets.GCP_ADC_JSON2 }}
+          GCP_ADC_JSON3: ${{ secrets.GCP_ADC_JSON3 }}
         run: |
           mkdir -p ~/.config/gcloud
-          echo '${{ secrets.GCP_ADC_JSON }}' > ~/.config/gcloud/application_default_credentials.json
-        shell: bash
+          printf '%s' "$GCP_ADC_JSON1" > ~/.config/gcloud/adc1.json
+          printf '%s' "$GCP_ADC_JSON2" > ~/.config/gcloud/adc2.json
+          printf '%s' "$GCP_ADC_JSON3" > ~/.config/gcloud/adc3.json
+          for i in 1 2 3; do
+            if [ ! -s ~/.config/gcloud/adc$i.json ]; then
+              echo "::warning::Secret GCP_ADC_JSON$i is empty; falling back to GCP_ADC_JSON1"
+              cp ~/.config/gcloud/adc1.json ~/.config/gcloud/adc$i.json
+            fi
+          done
 
-      - name: Provision Colab session (free T4 GPU)
-        run: python colab_patched.py --auth adc new -s github_job --gpu T4
-
-      - name: Run notebooks on Colab
+      - name: Run notebooks in parallel batches of 3
         shell: bash
         run: |
-          mkdir -p artifacts
+          mkdir -p artifacts logs
           set +e
-          failed=0
-          notebooks=(
-            "2_Course_continuation/_3_NLP/_1_Lexical_processing/_1_Intro_to_NLP/_1_.ipynb"
-            "2_Course_continuation/_3_NLP/_1_Lexical_processing/_1_Intro_to_NLP/_2_Regular_Expressions.ipynb"
-            "2_Course_continuation/_3_NLP/_1_Lexical_processing/_1_Intro_to_NLP/_3_Regex_Bonus_exercise_with_solution.ipynb"
+
+          # Per-notebook entries; one row per notebook.
+          # Format: "<path>|<profile>"   profile = long | short
+          entries=(
+            "2_Course_continuation/_3_NLP/_1_Lexical_processing/_1_Intro_to_NLP/_2_Regular_Expressions.ipynb|long"   # loc=147
+            "2_Course_continuation/_3_NLP/_1_Lexical_processing/_1_Intro_to_NLP/_3_Regex_Bonus_exercise_with_solution.ipynb|short"   # loc=74
+            "2_Course_continuation/_3_NLP/_1_Lexical_processing/_1_Intro_to_NLP/_1_.ipynb|short"   # loc=37
           )
-          for nb in "${notebooks[@]}"; do
-            echo "================================================================"
-            echo "RUNNING: $nb"
-            echo "================================================================"
-            python colab_patched.py --auth adc exec -s github_job -f "$nb"
-            rc=$?
-            if [ $rc -ne 0 ]; then
-              echo "::warning::Notebook FAILED (rc=$rc): $nb"
-              failed=$((failed+1))
-            fi
-            safe=$(echo "$nb" | sed 's#[/ ()+]#_#g' | sed 's#\.ipynb$##')
-            
-            # The CLI automatically downloads the executed notebook locally
-            local_output="${nb%.ipynb}_output.ipynb"
-            echo "Moving locally saved executed notebook to artifacts..."
-            if [ -f "$local_output" ]; then
-              mv "$local_output" "artifacts/${safe}_executed.ipynb"
+
+          # ----- Per-slot worker (runs in a subshell, isolated credentials) -----
+          run_one() {
+            local nb="$1"
+            local profile="$2"
+            local slot="$3"
+            local session="github_job_${slot}"
+            local logfile="$4"
+
+            export GOOGLE_APPLICATION_CREDENTIALS="$HOME/.config/gcloud/adc${slot}.json"
+
+            if [ "$profile" = "long" ]; then
+              accelerators=(T4 CPU)
             else
-              echo "::warning::Executed notebook not found locally, falling back to original."
-              cp "$nb" "artifacts/${safe}_executed.ipynb"
+              accelerators=(CPU)
             fi
-            
-            # Change: Use a short timestamp-based name for the artifact to avoid long paths
-            ts=$(date +%Y%m%d_%H%M%S)
-            safe="${ts}"
-            
-            # Now the artifact will be named: [timestamp]_outputs.zip
-            # Example: 20260628_153015_outputs.zip
-            echo "Downloading outputs folder from Colab..."
-            python colab_patched.py --auth adc download -s github_job /content/outputs.zip "artifacts/${safe}_outputs.zip" 2>/dev/null || true
+
+            local exec_ok=0
+            local acc
+            for acc in "${accelerators[@]}"; do
+              echo "[slot=$slot adc=$slot] try accelerator=$acc for $nb"
+              python colab_patched.py --auth adc stop -s "$session" >/dev/null 2>&1 || true
+              if [ "$acc" = "CPU" ]; then
+                python colab_patched.py --auth adc new -s "$session"
+              else
+                python colab_patched.py --auth adc new -s "$session" --gpu "$acc"
+              fi
+              local new_rc=$?
+              if [ $new_rc -ne 0 ]; then
+                echo "::warning::[slot=$slot] session create failed acc=$acc rc=$new_rc"
+                continue
+              fi
+
+              python colab_patched.py --auth adc exec -s "$session" -f "$nb"
+              local exec_rc=$?
+
+              local safe
+              safe=$(echo "$nb" | sed 's#[/ ()+]#_#g' | sed 's#\.ipynb$##')
+              python colab_patched.py --auth adc download -s "$session" /content/outputs.zip "artifacts/${safe}_outputs.zip" 2>/dev/null || true
+              local nb_base
+              nb_base=$(basename "$nb")
+              python colab_patched.py --auth adc download -s "$session" "/content/$nb_base" "artifacts/${safe}_executed.ipynb" 2>/dev/null || cp "$nb" "artifacts/${safe}_executed.ipynb"
+              python colab_patched.py --auth adc stop -s "$session" >/dev/null 2>&1 || true
+
+              if [ $exec_rc -eq 0 ]; then
+                exec_ok=1
+                echo "[slot=$slot] OK on acc=$acc -- $nb"
+                break
+              else
+                echo "::warning::[slot=$slot] exec failed acc=$acc rc=$exec_rc -- $nb"
+              fi
+            done
+
+            if [ $exec_ok -ne 1 ]; then
+              echo "::error::[slot=$slot] all fallbacks exhausted for $nb"
+              return 1
+            fi
+            return 0
+          }
+
+          # ----- Batch driver -----
+          total=${#entries[@]}
+          batch_size=3
+          failed=0
+          batch_no=0
+          i=0
+          while [ $i -lt $total ]; do
+            batch_no=$((batch_no+1))
+            echo ""
+            echo "################################################################"
+            echo "# BATCH $batch_no  (notebooks $((i+1)) .. $((i+batch_size<total?i+batch_size:total)) / $total)"
+            echo "################################################################"
+
+            pids=()
+            slots=()
+            logs=()
+            nbs=()
+            for slot in 1 2 3; do
+              idx=$((i + slot - 1))
+              [ $idx -ge $total ] && break
+              entry="${entries[$idx]}"
+              nb="${entry%%|*}"
+              profile="${entry##*|}"
+              safe=$(echo "$nb" | sed 's#[/ ()+]#_#g' | sed 's#\.ipynb$##')
+              logfile="logs/batch${batch_no}_slot${slot}_${safe}.log"
+
+              echo "[batch $batch_no slot $slot] LAUNCH adc=$slot profile=$profile  $nb"
+
+              (
+                run_one "$nb" "$profile" "$slot" "$logfile"
+              ) > "$logfile" 2>&1 &
+              pids+=($!)
+              slots+=($slot)
+              logs+=("$logfile")
+              nbs+=("$nb")
+            done
+
+            # Wait for all slots in this batch
+            k=0
+            for pid in "${pids[@]}"; do
+              if ! wait "$pid"; then
+                failed=$((failed+1))
+              fi
+              k=$((k+1))
+            done
+
+            # Dump per-slot logs in order so output is readable
+            for k in "${!logs[@]}"; do
+              echo ""
+              echo "----- [batch $batch_no slot ${slots[$k]}] ${nbs[$k]} -----"
+              cat "${logs[$k]}"
+            done
+
+            i=$((i + batch_size))
           done
-          echo "Finished. Failed count: $failed"
+
+          echo ""
+          echo "################################################################"
+          echo "# Summary: $((total-failed))/$total succeeded, $failed failed"
+          echo "################################################################"
+          exit 0
 
       - name: Upload artifacts
         if: always()
         uses: actions/upload-artifact@v4
         with:
           name: gcolab-2_course_continuation_3_nlp_1_lexical_processing_1_intro_to_nlp
-          path: artifacts/
+          path: |
+            artifacts/
+            logs/
 
       - name: Hard Shutdown Cleanup
         if: always()
-        run: python colab_patched.py --auth adc stop -s github_job
+        shell: bash
+        run: |
+          for slot in 1 2 3; do
+            export GOOGLE_APPLICATION_CREDENTIALS="$HOME/.config/gcloud/adc${slot}.json"
+            python colab_patched.py --auth adc stop -s "github_job_${slot}" >/dev/null 2>&1 || true
+          done
