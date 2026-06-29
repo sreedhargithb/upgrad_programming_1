@@ -1,7 +1,7 @@
 name: Trigger All Workflows
 
 on:
-  workflow_dispatch: # Allows you to trigger this manually from the Actions tab
+  workflow_dispatch:
 
 jobs:
   trigger-all-workflows:
@@ -9,28 +9,24 @@ jobs:
     steps:
       - name: Run GitHub CLI loop to trigger workflows
         env:
-          # CRITICAL: You must use a PAT with 'actions:write' permissions here.
-          # Default secrets.GITHUB_TOKEN will NOT trigger other workflows.
           GH_TOKEN: ${{ secrets.TRIGGER_WORKFLOWS_PAT }}
         run: |
           CURRENT_WORKFLOW="${{ github.workflow }}"
-          echo "Fetching all active workflows..."
+          REPO="${{ github.repository }}"
+          echo "Fetching all active workflows for $REPO..."
           
-          # List all workflows in JSON format (up to 100)
-          workflows=$(gh workflow list --json id,name,state --limit 100)
+          # Added -R "$REPO" so gh knows exactly which repository to query
+          workflows=$(gh workflow list -R "$REPO" --json id,name,state --limit 100)
           
           echo "$workflows" | jq -c '.[]' | while read -r row; do
             id=$(echo "$row" | jq -r '.id')
             name=$(echo "$row" | jq -r '.name')
             state=$(echo "$row" | jq -r '.state')
             
-            # 1. Skip disabled workflows
-            # 2. Skip THIS workflow to prevent an infinite loop
             if [ "$state" = "active" ] && [ "$name" != "$CURRENT_WORKFLOW" ]; then
               echo "🚀 Attempting to trigger: $name (ID: $id)"
               
-              # 'gh workflow run' will fail if the target workflow lacks workflow_dispatch.
-              # We use '|| true' to log the error and continue to the next workflow.
-              gh workflow run "$id" || echo "⚠️ Skipped $name (likely missing workflow_dispatch)"
+              # Added -R "$REPO" here as well to execute the trigger target safely
+              gh workflow run "$id" -R "$REPO" || echo "⚠️ Skipped $name (likely missing workflow_dispatch)"
             fi
           done
