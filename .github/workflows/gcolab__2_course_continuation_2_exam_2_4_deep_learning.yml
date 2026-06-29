@@ -35,6 +35,42 @@ jobs:
               main()
           EOF
 
+      - name: Create Colab Cleanup Helper
+        run: |
+          cat << 'EOF' > colab_cleanup.py
+          """Release every Colab assignment currently held by the credential at
+          $GOOGLE_APPLICATION_CREDENTIALS. Used to clear zombie sessions left
+          by previous workflow runs that crashed before tearing down."""
+          import os, sys
+          try:
+              from colab_cli.common import state
+              from colab_cli.auth import AuthProvider
+          except Exception as e:
+              print(f"[cleanup] could not import colab_cli: {e}")
+              sys.exit(0)
+          state.auth_provider = AuthProvider.ADC
+          try:
+              assignments = state.client.list_assignments()
+          except Exception as e:
+              print(f"[cleanup] list_assignments failed: {e}")
+              sys.exit(0)
+          if not assignments:
+              print("[cleanup] no active assignments to release.")
+              sys.exit(0)
+          released = 0
+          for a in assignments:
+              ep = getattr(a, "endpoint", None)
+              if not ep:
+                  continue
+              try:
+                  state.client.unassign(ep)
+                  released += 1
+                  print(f"[cleanup] released {ep}")
+              except Exception as e:
+                  print(f"[cleanup] unassign failed for {ep}: {e}")
+          print(f"[cleanup] released {released} stale assignment(s).")
+          EOF
+
       - name: Restore 3 Google ADC credentials
         shell: bash
         env:
@@ -51,6 +87,15 @@ jobs:
               echo "::warning::Secret GCP_ADC_JSON$i is empty; falling back to GCP_ADC_JSON1"
               cp ~/.config/gcloud/adc1.json ~/.config/gcloud/adc$i.json
             fi
+          done
+
+      - name: Pre-flight - clear stale Colab sessions on all ADC slots
+        shell: bash
+        run: |
+          for slot in 1 2 3; do
+            echo "----- pre-flight cleanup for adc=$slot -----"
+            export GOOGLE_APPLICATION_CREDENTIALS="$HOME/.config/gcloud/adc${slot}.json"
+            python colab_cleanup.py || true
           done
 
       - name: Run notebooks sequentially (ADC rotated per notebook)
@@ -76,7 +121,7 @@ jobs:
             export GOOGLE_APPLICATION_CREDENTIALS="$HOME/.config/gcloud/adc${slot}.json"
 
             if [ "$profile" = "long" ]; then
-              accelerators=(T4 L4 CPU)
+              accelerators=(T4 CPU)
             else
               accelerators=(CPU)
             fi
@@ -86,14 +131,24 @@ jobs:
             for acc in "${accelerators[@]}"; do
               echo "[slot=$slot adc=$slot] try accelerator=$acc for $nb"
               python colab_patched.py --auth adc stop -s "$session" >/dev/null 2>&1 || true
-              if [ "$acc" = "CPU" ]; then
-                python colab_patched.py --auth adc new -s "$session"
-              else
-                python colab_patched.py --auth adc new -s "$session" --gpu "$acc"
-              fi
-              local new_rc=$?
+              local attempt
+              local new_rc=1
+              for attempt in 1 2; do
+                if [ "$acc" = "CPU" ]; then
+                  python colab_patched.py --auth adc new -s "$session"
+                else
+                  python colab_patched.py --auth adc new -s "$session" --gpu "$acc"
+                fi
+                new_rc=$?
+                if [ $new_rc -eq 0 ]; then
+                  break
+                fi
+                echo "::warning::[slot=$slot] session create failed acc=$acc attempt=$attempt rc=$new_rc; sweeping zombies"
+                python colab_cleanup.py || true
+                sleep 10
+              done
               if [ $new_rc -ne 0 ]; then
-                echo "::warning::[slot=$slot] session create failed acc=$acc rc=$new_rc"
+                echo "::warning::[slot=$slot] session create gave up acc=$acc after retry"
                 continue
               fi
 
