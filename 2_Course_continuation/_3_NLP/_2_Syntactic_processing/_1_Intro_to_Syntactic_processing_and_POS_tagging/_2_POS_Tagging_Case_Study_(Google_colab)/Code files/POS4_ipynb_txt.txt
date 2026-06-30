@@ -1,0 +1,79 @@
+import pandas as pd
+import numpy as np
+from tqdm import tqdm
+
+# 1. Download the file from the URL to the Colab disk
+!wget "https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/2_Course_continuation/_3_NLP/_2_Syntactic_processing/_1_Intro_to_Syntactic_processing_and_POS_tagging/_2_POS_Tagging_Case_Study_(Google_colab)/Dataset/Samsung.txt"
+
+# 2. Open the local file (matching your original code)
+con = open("Samsung.txt", 'r', encoding="utf-8")
+samsung_reviews = con.read()
+con.close()
+
+import re
+s1 = "The battery was great."
+
+pattern = re.compile("\w+\sbattery\s\w+")
+
+re.findall(pattern,s1)
+
+re.findall(pattern,s1)[0]
+
+re.findall(pattern,s1)[0].split(" ")
+
+re.findall(pattern,s1)[0].split(" ")[0] ## prefix
+
+re.findall(pattern,s1)[0].split(" ")[-1] ## suffix
+
+prefixes_suffixes = re.findall(pattern,samsung_reviews)
+
+prefixes_suffixes[0:10]
+
+prefixes_suffixes[0].split(" ")
+
+prefixes = []
+suffixes = []
+for p in prefixes_suffixes:
+    l = p.split(" ")
+    prefixes.append(l[0].lower())
+    suffixes.append(l[-1].lower())
+
+pd.Series(prefixes).value_counts().head(5)
+
+pd.Series(suffixes).value_counts().head(5)
+
+stop_words = ["i", "me", "my", "myself", "we", "our", "ours", "ourselves", "you", "your", "yours", "yourself", "yourselves", "he", "him", "his", "himself", "she", "her", "hers", "herself", "it", "its", "itself", "they", "them", "their", "theirs", "themselves", "what", "which", "who", "whom", "this", "that", "these", "those", "am", "is", "are", "was", "were", "be", "been", "being", "have", "has", "had", "having", "do", "does", "did", "doing", "a", "an", "the", "and", "but", "if", "or", "because", "as", "until", "while", "of", "at", "by", "for", "with", "about", "against", "between", "into", "through", "during", "before", "after", "above", "below", "to", "from", "up", "down", "in", "out", "on", "off", "over", "under", "again", "further", "then", "once", "here", "there", "when", "where", "why", "how", "all", "any", "both", "each", "few", "more", "most", "other", "some", "such", "no", "nor", "not", "only", "own", "same", "so", "than", "too", "very", "s", "t", "can", "will", "just", "don", "should", "now"]
+
+prefixes = [p for p in prefixes if p not in stop_words]
+suffixes = [s for s in suffixes if s not in stop_words]
+
+pd.Series(prefixes).value_counts().head(5)
+
+pd.Series(suffixes).value_counts().head(5)
+
+prefixes=pd.Series(prefixes).value_counts().head(5).index
+suffixes=pd.Series(suffixes).value_counts().head(5).index
+
+pd.DataFrame({'prefixes':prefixes,'keyword':['battery']*len(prefixes),'suffixes':suffixes})
+
+def get_context(reviews,keyword):
+    pattern = re.compile(f"\w+\s{keyword}\s\w+")
+    prefixes_suffixes = re.findall(pattern,reviews)
+    prefixes = []
+    suffixes = []
+    for p in prefixes_suffixes:
+        l = p.split(" ")
+        prefixes.append(l[0].lower())
+        suffixes.append(l[-1].lower())
+    prefixes = [p for p in prefixes if p not in stop_words]
+    suffixes = [s for s in suffixes if s not in stop_words]
+    prefixes=pd.Series(prefixes).value_counts().head(5).index
+    suffixes=pd.Series(suffixes).value_counts().head(5).index
+    return pd.DataFrame({'prefixes':prefixes,'keyword':[f'{keyword}']*len(prefixes),'suffixes':suffixes})
+
+get_context(samsung_reviews,"battery")
+
+get_context(samsung_reviews,"screen")
+
+import datetime, pytz; 
+print("Current Time in IST:", datetime.datetime.now(pytz.utc).astimezone(pytz.timezone('Asia/Kolkata')).strftime('%Y-%m-%d %H:%M:%S'))

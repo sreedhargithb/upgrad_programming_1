@@ -1,0 +1,44 @@
+import pandas as pd
+
+
+data = pd.read_csv("https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/2_Course_continuation/_3_NLP/_2_Syntactic_processing/_1_Intro_to_Syntactic_processing_and_POS_tagging/tagged_words.csv")
+sent = "I saw him running away"
+
+def get_common_tag(data,word):
+    if word.lower() in data['word'].unique():
+        q = f"word=='{word.lower()}'"
+        return word , data.query(q)['tag'].value_counts().head(1).index.tolist()[0]
+    else:
+        return f"{word} not in data"
+
+for word in sent.split(" "):
+    print(get_common_tag(data,word))
+
+print(
+    data.query("word=='saw'")['tag'].value_counts()
+)
+
+data = pd.read_csv("https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/2_Course_continuation/_3_NLP/_2_Syntactic_processing/_1_Intro_to_Syntactic_processing_and_POS_tagging/tagged_words.csv")
+s = "He wished he was rich"
+
+def get_common_tag(data,word):
+    if word.lower() in data['word'].unique():
+        q = f"word=='{word.lower()}'"
+        return word , data.query(q)['tag'].value_counts().head(1).index.tolist()[0]
+    else:
+        return f"{word} not in data"
+
+for word in s.split(" "):
+    print(get_common_tag(data,word))
+
+import pandas as pd
+data = pd.read_csv("https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/2_Course_continuation/_3_NLP/_2_Syntactic_processing/_1_Intro_to_Syntactic_processing_and_POS_tagging/tagged_words.csv")
+emmission_matrix = pd.crosstab(data['word'],data['tag'],normalize='columns')
+
+word = 'his'
+emmission_matrix.loc[word][emmission_matrix.loc[word]>0].round(3)
+emmission_matrix['PRON'].loc['his'].round(3)
+
+
+import datetime, pytz;
+print("Current Time in IST:", datetime.datetime.now(pytz.utc).astimezone(pytz.timezone('Asia/Kolkata')).strftime('%Y-%m-%d %H:%M:%S'))

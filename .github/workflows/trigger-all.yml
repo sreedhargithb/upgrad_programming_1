@@ -1,138 +1,154 @@
-name: Trigger All Workflows In Parallel Batches
+name: "trigger-all // Run All Scripts"
 
 on:
   workflow_dispatch:
     inputs:
-      batch_size:
-        description: 'How many child workflows to launch in parallel per batch'
+      chunk:
+        description: 'Which chunk to run (1-12, or "all" for matrix)'
         required: false
-        default: '3'
-      wait_between_batches_seconds:
-        description: 'Seconds to wait between launching batches (lets GitHub register the runs)'
-        required: false
-        default: '15'
+        default: 'all'
 
 jobs:
-  trigger-all-workflows:
+  # First job: list all scripts and create chunks
+  prepare:
     runs-on: ubuntu-latest
-    timeout-minutes: 60
+    outputs:
+      chunks: ${{ steps.chunk.outputs.chunks }}
+      total: ${{ steps.chunk.outputs.total }}
     steps:
-      - name: Sanity-check PAT token
-        env:
-          GH_TOKEN: ${{ secrets.TRIGGER_WORKFLOWS_PAT }}
-        shell: bash
+      - uses: actions/checkout@v4
+      
+      - name: Create chunks
+        id: chunk
         run: |
-          set +e
-          echo "Verifying TRIGGER_WORKFLOWS_PAT can call the GitHub API..."
-          gh api user --jq '.login' || {
-            echo "::error::TRIGGER_WORKFLOWS_PAT is invalid/expired. Update the repo secret and retry."
-            exit 1
-          }
-          echo "Verifying token can list workflows in $GITHUB_REPOSITORY..."
-          gh workflow list -R "$GITHUB_REPOSITORY" --limit 1 >/dev/null || {
-            echo "::error::Token works for /user but lacks repo Actions:read on $GITHUB_REPOSITORY."
-            exit 1
-          }
-          echo "OK"
-
-      - name: Trigger all child workflows in parallel batches
-        env:
-          GH_TOKEN: ${{ secrets.TRIGGER_WORKFLOWS_PAT }}
-          BATCH_SIZE: ${{ github.event.inputs.batch_size }}
-          WAIT_SECS:  ${{ github.event.inputs.wait_between_batches_seconds }}
-        shell: bash
-        run: |
-          set -uo pipefail
-          CURRENT_WORKFLOW="${{ github.workflow }}"
-          REPO="$GITHUB_REPOSITORY"
-          BATCH_SIZE="${BATCH_SIZE:-3}"
-          WAIT_SECS="${WAIT_SECS:-15}"
-          echo "Repo:           $REPO"
-          echo "Self workflow:  $CURRENT_WORKFLOW"
-          echo "Batch size:     $BATCH_SIZE"
-          echo "Wait/batch:     ${WAIT_SECS}s"
-          echo ""
-
-          # Collect every active, non-self workflow
-          mapfile -t rows < <(gh workflow list -R "$REPO" --json id,name,state --limit 200 \
-              | jq -c --arg cur "$CURRENT_WORKFLOW" \
-                    '.[] | select(.state=="active" and .name!=$cur)')
-
-          ids=()
-          names=()
-          for row in "${rows[@]}"; do
-            ids+=("$(echo "$row"   | jq -r '.id')")
-            names+=("$(echo "$row" | jq -r '.name')")
-          done
-          total=${#ids[@]}
-          if [ "$total" -eq 0 ]; then
-            echo "No active sibling workflows found. Nothing to do."
-            exit 0
+          # Find all Python scripts
+          mapfile -t scripts < <(find . -name "*.py" -type f ! -path "./.github/*" | sort)
+          total=${#scripts[@]}
+          echo "Found $total scripts"
+          echo "total=$total" >> $GITHUB_OUTPUT
+          
+          # Create 12 chunks (about 10 scripts each)
+          if [ "${{ github.event.inputs.chunk }}" = "all" ]; then
+            echo 'chunks=["1","2","3","4","5","6","7","8","9","10","11","12"]' >> $GITHUB_OUTPUT
+          else
+            echo 'chunks=["${{ github.event.inputs.chunk }}"]' >> $GITHUB_OUTPUT
           fi
-          echo "Found $total workflows. Launching in batches of $BATCH_SIZE..."
-          echo ""
 
-          # --- launch one workflow; ALWAYS exit 0 so one bad row never kills the loop ---
-          fire_one() {
-            local id="$1"
-            local name="$2"
-            local label="$3"
-            # 2>&1 captures both stderr and stdout from gh
-            local out
-            if out=$(gh workflow run "$id" -R "$REPO" 2>&1); then
-              echo "[$label] OK      ->  $name (id=$id)"
-            else
-              echo "[$label] SKIPPED ->  $name (id=$id)"
-              echo "[$label]           reason: $out"
-            fi
-            return 0
-          }
+  # Run scripts in parallel chunks
+  run-chunk:
+    needs: prepare
+    runs-on: ubuntu-latest
+    timeout-minutes: 120  # 2 hours per chunk
+    strategy:
+      fail-fast: false
+      matrix:
+        chunk: ${{ fromJson(needs.prepare.outputs.chunks) }}
+    
+    steps:
+      - uses: actions/checkout@v4
+      
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-          launched=0
-          batch_no=0
-          i=0
-          while [ "$i" -lt "$total" ]; do
-            batch_no=$((batch_no+1))
-            end=$(( i + BATCH_SIZE ))
-            [ "$end" -gt "$total" ] && end=$total
-            echo "================================================================"
-            echo "BATCH $batch_no  (workflows $((i+1))..$end of $total)"
-            echo "================================================================"
-
-            pids=()
-            for j in $(seq "$i" $((end-1))); do
-              label="batch${batch_no}/slot$((j - i + 1))"
-              fire_one "${ids[$j]}" "${names[$j]}" "$label" &
-              pids+=($!)
-            done
-            for pid in "${pids[@]}"; do
-              wait "$pid" || true
-              launched=$((launched+1))
-            done
-
-            i=$end
-            if [ "$i" -lt "$total" ]; then
-              echo "(sleeping ${WAIT_SECS}s before next batch to let GitHub register runs)"
-              sleep "$WAIT_SECS"
-            fi
-          done
-
-          echo ""
-          echo "================================================================"
-          echo "Launched $launched / $total workflows."
-          echo "Children run independently from here -- this driver does NOT"
-          echo "wait for them to finish. Check the Actions tab for live status."
-          echo "================================================================"
-
-      - name: Summary of recently launched runs
-        if: always()
-        env:
-          GH_TOKEN: ${{ secrets.TRIGGER_WORKFLOWS_PAT }}
-        shell: bash
+      - name: Install dependencies
         run: |
-          set +e
-          echo "Most recent 30 runs in this repo:"
-          gh run list -R "$GITHUB_REPOSITORY" --limit 30 \
-            --json displayTitle,status,conclusion,createdAt,workflowName \
-            --jq '.[] | [.createdAt, .status, (.conclusion // "-"), .workflowName] | @tsv' \
-            | column -t -s $'\t' || true
+          python -m pip install --upgrade pip
+          pip install numpy pandas matplotlib seaborn scikit-learn scipy statsmodels
+          pip install tensorflow keras
+          pip install nltk spacy gensim wordcloud
+          pip install xgboost lightgbm catboost imbalanced-learn
+          pip install opencv-python-headless pillow
+          pip install jupyter ipython nbformat
+          pip install plotly
+          
+          python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk.download('wordnet'); nltk.download('averaged_perceptron_tagger')" || true
+          python -m spacy download en_core_web_sm || true
+
+      - name: Run chunk ${{ matrix.chunk }}
+        run: |
+          mkdir -p results
+          
+          # Find all scripts and split into chunks
+          mapfile -t scripts < <(find . -name "*.py" -type f ! -path "./.github/*" | sort)
+          total=${#scripts[@]}
+          
+          # Calculate chunk boundaries (12 chunks)
+          chunk_size=$(( (total + 11) / 12 ))
+          chunk=${{ matrix.chunk }}
+          start=$(( (chunk - 1) * chunk_size ))
+          end=$(( start + chunk_size ))
+          
+          if [ $end -gt $total ]; then
+            end=$total
+          fi
+          
+          echo "Chunk $chunk: scripts $((start+1)) to $end of $total"
+          
+          success=0
+          failed=0
+          
+          for i in $(seq $start $((end - 1))); do
+            script="${scripts[$i]}"
+            script_name=$(basename "$script")
+            script_dir=$(dirname "$script")
+            
+            echo "=============================================="
+            echo "[$((i+1))/$total] Running: $script"
+            echo "=============================================="
+            
+            cd "$script_dir"
+            timeout 300 python "$script_name" > "output_${script_name%.py}.log" 2>&1 && {
+              echo "SUCCESS"
+              success=$((success + 1))
+            } || {
+              echo "FAILED (exit: $?)"
+              failed=$((failed + 1))
+            }
+            cd - > /dev/null
+            
+            # Save output
+            cp "$script_dir/output_${script_name%.py}.log" "results/" 2>/dev/null || true
+          done
+          
+          echo ""
+          echo "Chunk $chunk Summary: Success=$success, Failed=$failed"
+
+      - name: Upload chunk results
+        uses: actions/upload-artifact@v4
+        with:
+          name: results-chunk-${{ matrix.chunk }}
+          path: results/
+          retention-days: 30
+          if-no-files-found: ignore
+
+  # Final summary job
+  summary:
+    needs: [prepare, run-chunk]
+    runs-on: ubuntu-latest
+    if: always()
+    steps:
+      - name: Download all results
+        uses: actions/download-artifact@v4
+        with:
+          path: all-results
+          pattern: results-chunk-*
+          merge-multiple: true
+
+      - name: Generate summary
+        run: |
+          echo "## Run All Scripts Summary" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
+          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
+          echo "| Total Scripts | ${{ needs.prepare.outputs.total }} |" >> $GITHUB_STEP_SUMMARY
+          echo "| Chunks | 12 |" >> $GITHUB_STEP_SUMMARY
+          echo "| Results | $(ls all-results/*.log 2>/dev/null | wc -l) logs |" >> $GITHUB_STEP_SUMMARY
+
+      - name: Upload combined results
+        uses: actions/upload-artifact@v4
+        with:
+          name: all-results-combined
+          path: all-results/
+          retention-days: 30

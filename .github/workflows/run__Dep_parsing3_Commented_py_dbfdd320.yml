@@ -1,0 +1,71 @@
+name: "run // .../_1_Dependency_Parsing_(Google_colab)/Commented code files/Dep_parsing3_Commented.py"
+
+on:
+  workflow_dispatch:
+  workflow_call:
+
+jobs:
+  run-script:
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install numpy pandas matplotlib seaborn scikit-learn scipy statsmodels
+          pip install tensorflow keras
+          pip install nltk spacy gensim wordcloud
+          pip install xgboost lightgbm catboost imbalanced-learn
+          pip install opencv-python-headless pillow
+          pip install jupyter ipython nbformat
+          pip install plotly
+          
+          # Download NLTK data
+          python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk.download('wordnet'); nltk.download('averaged_perceptron_tagger')" || true
+          
+          # Download spacy model
+          python -m spacy download en_core_web_sm || true
+
+      - name: Run script
+        id: run
+        continue-on-error: true
+        run: |
+          cd "2_Course_continuation/_3_NLP/_2_Syntactic_processing/_2_Parsing/_1_Dependency_Parsing_(Google_colab)/Commented code files"
+          
+          # Capture output
+          python "Dep_parsing3_Commented.py" 2>&1 | tee output.log
+          
+          echo "exit_code=$?" >> $GITHUB_OUTPUT
+
+      - name: Save output
+        uses: actions/upload-artifact@v4
+        with:
+          name: output-Dep_parsing3_Commented_py_dbfdd320
+          path: |
+            2_Course_continuation/_3_NLP/_2_Syntactic_processing/_2_Parsing/_1_Dependency_Parsing_(Google_colab)/Commented code files/output.log
+            2_Course_continuation/_3_NLP/_2_Syntactic_processing/_2_Parsing/_1_Dependency_Parsing_(Google_colab)/Commented code files/*.png
+            2_Course_continuation/_3_NLP/_2_Syntactic_processing/_2_Parsing/_1_Dependency_Parsing_(Google_colab)/Commented code files/*.jpg
+            2_Course_continuation/_3_NLP/_2_Syntactic_processing/_2_Parsing/_1_Dependency_Parsing_(Google_colab)/Commented code files/*.csv
+            2_Course_continuation/_3_NLP/_2_Syntactic_processing/_2_Parsing/_1_Dependency_Parsing_(Google_colab)/Commented code files/*.html
+          retention-days: 30
+          if-no-files-found: ignore
+
+      - name: Summary
+        run: |
+          echo "## Script: .../_1_Dependency_Parsing_(Google_colab)/Commented code files/Dep_parsing3_Commented.py" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "Exit code: ${{ steps.run.outcome }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Output (last 50 lines)" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          tail -50 "2_Course_continuation/_3_NLP/_2_Syntactic_processing/_2_Parsing/_1_Dependency_Parsing_(Google_colab)/Commented code files/output.log" >> $GITHUB_STEP_SUMMARY || echo "No output" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY

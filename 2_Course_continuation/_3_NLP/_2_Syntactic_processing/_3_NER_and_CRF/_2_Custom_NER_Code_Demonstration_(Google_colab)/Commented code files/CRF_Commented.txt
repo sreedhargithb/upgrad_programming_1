@@ -1,0 +1,57 @@
+with open('sent_train', 'r') as train_sent_file:
+  train_sentences = train_sent_file.readlines()
+
+with open('label_train', 'r') as train_labels_file:
+  train_labels = train_labels_file.readlines()
+
+with open('sent_test', 'r') as test_sent_file:
+  test_sentences = test_sent_file.readlines()
+
+with open('label_test', 'r') as test_labels_file:
+  test_labels = test_labels_file.readlines()
+
+
+# Print the 6th sentence in the test set i.e. index value 5.
+
+# Print the labels of this sentence
+
+
+# Install pycrf and crfsuit packages using pip command
+
+
+#Define a function to get the above defined features for a word.
+
+
+# Define a function to get features for a sentence 
+# using the 'getFeaturesForOneWord' function.
+
+
+# Define a function to get the labels for a sentence.
+
+
+# Apply function 'getFeaturesForOneSentence' to get features on a single sentence which is at index value 5 in train_sentences
+
+
+
+
+import sklearn_crfsuite
+
+from sklearn_crfsuite import metrics
+
+# Build the CRF model.
+
+
+# Calculate the f1 score using the test data
+
+
+# Print the orginal labels and predicted labels for the sentence  in test data, which is at index value 10.
+
+
+from util import print_top_likely_transitions
+from util import print_top_unlikely_transitions
+
+print_top_likely_transitions(crf.transition_features_)
+
+print_top_unlikely_transitions(crf.transition_features_)
+
+

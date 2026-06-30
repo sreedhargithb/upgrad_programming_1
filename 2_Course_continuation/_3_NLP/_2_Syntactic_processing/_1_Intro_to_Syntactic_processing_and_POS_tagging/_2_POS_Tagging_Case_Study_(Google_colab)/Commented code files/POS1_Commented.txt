@@ -1,0 +1,20 @@
+# Import libraries
+import pandas as pd
+import numpy as np
+import os
+
+sent1 = "I loved the screen on this phone."
+sent2 = "The battery life on this phone is great."
+sent3 = "The speakers are pathetic."
+
+# import Spacy and load model.
+
+
+# Print the PoS tag of sent1
+
+
+# Print the PoS tag of sent2
+
+
+# Print the PoS tag of sent3
+

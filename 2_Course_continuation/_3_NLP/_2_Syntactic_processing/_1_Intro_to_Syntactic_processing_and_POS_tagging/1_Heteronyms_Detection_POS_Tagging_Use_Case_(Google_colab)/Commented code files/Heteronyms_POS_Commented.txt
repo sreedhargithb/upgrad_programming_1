@@ -1,0 +1,17 @@
+# Import SpaCy library
+
+
+# Load pre-trained SpaCy model for performing basic 
+# NLP tasks such as POS tagging, parsing, etc.
+
+
+#Use the model to process the input sentence
+
+
+# Print the tokens and their respective PoS tags.
+
+
+# Let's take a new example.
+
+
+
