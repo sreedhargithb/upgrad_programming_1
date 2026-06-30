@@ -99,7 +99,8 @@ jobs:
             echo "=============================================="
             
             cd "$script_dir"
-            timeout 300 python "$script_name" > "output_${script_name%.py}.log" 2>&1 && {
+            # Use ipython to handle get_ipython() calls
+            timeout 300 ipython --no-banner "$script_name" > "output_${script_name%.py}.log" 2>&1 && {
               echo "SUCCESS"
               success=$((success + 1))
             } || {
