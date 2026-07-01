@@ -1,11 +1,11 @@
 #!/usr/bin/env python
 # coding: utf-8
-----------------------------------------------------------------------
-Filename : intro-to-wordnet.ipynb
-Author   : Jaidev Deshpande
-Purpose  : Understanding Wordnet functionalities
-Libraries: nltk
-----------------------------------------------------------------------
+# ----------------------------------------------------------------------
+# Filename : intro-to-wordnet.ipynb
+# Author   : Jaidev Deshpande
+# Purpose  : Understanding Wordnet functionalities
+# Libraries: nltk
+# ----------------------------------------------------------------------
 # ## [WordNet®](https://wordnet.princeton.edu/) Tutorial
 # 
 # ### Navigating Wornet Relationships

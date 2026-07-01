@@ -59,9 +59,10 @@ jobs:
           pip install tensorflow keras
           pip install nltk spacy gensim wordcloud
           pip install xgboost lightgbm catboost imbalanced-learn
-          pip install opencv-python-headless pillow
+          pip install opencv-python-headless pillow imageio
           pip install jupyter ipython nbformat
           pip install plotly
+          pip install kagglehub sklearn-crfsuite
           
           python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk.download('wordnet'); nltk.download('averaged_perceptron_tagger')" || true
           python -m spacy download en_core_web_sm || true

@@ -93,7 +93,7 @@ df_sms.hist(column='length', by='label', bins=50,figsize=(10,4))
 # In[12]:
 
 
-df_sms.loc[:,'label'] = df_sms.label.map({'ham':0, 'spam':1})
+df_sms['label'] = df_sms['label'].map({'ham':0, 'spam':1}).astype(int)
 print(df_sms.shape)
 df_sms.head()
 

@@ -16,7 +16,7 @@ from tqdm import tqdm
 # In[ ]:
 
 
-con=open("../data/Samsung.txt",'r', encoding="utf-8")
+con=open("../Dataset/Samsung.txt",'r', encoding="utf-8")
 samsung_reviews=con.read()
 con.close()
 

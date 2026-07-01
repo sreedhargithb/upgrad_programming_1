@@ -24,7 +24,7 @@ nlp = spacy.load("en_core_web_sm")
 
 
 # Load the Samsung.txt dataset
-con=open("../data/Samsung.txt",'r', encoding="utf-8")
+con=open("../Dataset/Samsung.txt",'r', encoding="utf-8")
 samsung_reviews=con.read()
 con.close()
 

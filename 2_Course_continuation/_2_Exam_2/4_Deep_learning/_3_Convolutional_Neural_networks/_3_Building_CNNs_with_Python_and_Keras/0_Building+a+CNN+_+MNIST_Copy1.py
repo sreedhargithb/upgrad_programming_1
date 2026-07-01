@@ -1,4 +1,4 @@
-!pip install tensorflow
+get_ipython().system('pip install tensorflow')
 import numpy as np
 import random
 import tensorflow as tf

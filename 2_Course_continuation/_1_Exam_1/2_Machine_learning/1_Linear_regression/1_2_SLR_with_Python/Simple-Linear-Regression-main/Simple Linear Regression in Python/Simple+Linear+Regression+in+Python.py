@@ -40,7 +40,7 @@ X_train.head()
 
 y_train.head()
 
-!pip install statsmodels
+get_ipython().system('pip install statsmodels')
 
 import statsmodels.api as sm
 

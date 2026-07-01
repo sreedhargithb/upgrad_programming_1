@@ -1,12 +1,20 @@
 import re
+import os
+import urllib.request
 from collections import Counter
 
 def words(document):
 	"Convert text to lower case and tokenize the document"
 	return re.findall(r'\w+', document.lower())
 
+# Download big.txt if not present (Peter Norvig's corpus)
+big_txt_path = os.path.join(os.path.dirname(__file__) or '.', 'big.txt')
+if not os.path.exists(big_txt_path):
+    print("Downloading big.txt corpus...")
+    urllib.request.urlretrieve("https://norvig.com/big.txt", big_txt_path)
+
 # create a frequency table of all the words of the document
-all_words = Counter(words(open('big.txt').read()))
+all_words = Counter(words(open(big_txt_path).read()))
 
 def edits_one(word):
     "Create all edits that are one edit away from `word`."

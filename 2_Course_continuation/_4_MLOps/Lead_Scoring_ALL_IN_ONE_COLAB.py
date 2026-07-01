@@ -1,7 +1,7 @@
 from google.colab import drive
 drive.mount('/content/drive')
 
-!pip install --quiet "numpy==2.0.2" "pandas==2.2.3" "scikit-learn==1.5.2" "lightgbm==4.5.0" "mlflow==2.17.2"
+get_ipython().system('pip install --quiet "numpy==2.0.2" "pandas==2.2.3" "scikit-learn==1.5.2" "lightgbm==4.5.0" "mlflow==2.17.2"')
 
 import os, shutil, sys, pathlib, subprocess, time, requests
 
@@ -83,7 +83,7 @@ for _ in range(20):
     time.sleep(2)
 else:
     print("MLflow failed — see /tmp/mlflow.log")
-    !tail -30 /tmp/mlflow.log
+    get_ipython().system('tail -30 /tmp/mlflow.log')
 
 import importlib.util
 

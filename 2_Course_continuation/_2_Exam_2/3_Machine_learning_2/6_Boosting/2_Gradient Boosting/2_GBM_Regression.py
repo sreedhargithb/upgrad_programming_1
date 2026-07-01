@@ -1,5 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
+from __future__ import division
 
 # **STEP 1:   IMPORTING LIBRARIES**
 
@@ -13,7 +14,6 @@ import math
 import seaborn as sns
 import matplotlib
 import matplotlib.pyplot as plt
-from __future__ import division
 from scipy.stats import pearsonr
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split

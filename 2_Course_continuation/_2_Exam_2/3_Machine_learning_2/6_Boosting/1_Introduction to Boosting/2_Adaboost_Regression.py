@@ -1,4 +1,6 @@
-!pip install xgboost
+from __future__ import division
+
+get_ipython().system('pip install xgboost')
 
 import numpy as np
 import pandas as pd
@@ -7,7 +9,6 @@ import math
 import seaborn as sns
 import matplotlib
 import matplotlib.pyplot as plt
-from __future__ import division
 from scipy.stats import pearsonr
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split

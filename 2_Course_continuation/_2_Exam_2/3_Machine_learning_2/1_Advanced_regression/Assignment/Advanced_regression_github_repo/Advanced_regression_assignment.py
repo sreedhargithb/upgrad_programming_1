@@ -10,7 +10,7 @@ import seaborn as sns
 import warnings
 warnings.filterwarnings("ignore")
 import matplotlib.pyplot as plt
-%matplotlib inline
+get_ipython().run_line_magic('matplotlib', 'inline')
 from sklearn.metrics import r2_score
 from sklearn.metrics import mean_squared_error
 from statsmodels.stats.outliers_influence import variance_inflation_factor
