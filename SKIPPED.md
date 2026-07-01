@@ -26,6 +26,7 @@ Scripts that used to be here but now have a working public-mirror rewrite (e.g. 
 | 6 | `gesture_control_for_smarttv_model_6_7_8.py` | SmartTV gesture assignment (models 6–8). Same dataset dependency as above. | Non-public dataset |
 | 7 | `gesture_control_for_smarttv_model_9_10.py` | SmartTV gesture assignment (models 9–10). Same dataset dependency as above. | Non-public dataset |
 | 8 | `skin_cancer_detection_melanoma.py` | Uses `kagglehub.dataset_download("jaiahuja/skin-cancer-detection")` (2 357-image ISIC subset). No verified no-auth mirror exists for this specific 9-class layout. Candidate ISIC-challenge S3 mirrors (2018 / 2019) have different class structure and are 2.7–9.7 GB, making them impractical to swap in without a full re-write of the training script. | Non-public dataset |
+| 9 | `working-with-chest-xray-images.py` | The script *has* been rewritten to download the Mendeley chest-xray dataset (1.15 GB) at runtime and works from a home network. However, Mendeley's underlying AWS S3 pre-signed URL returns **HTTP 403** when hit from GitHub Actions runner IPs (observed in the actual CI log). Left in the skip list until either a runner-friendly mirror is found or Mendeley stops region/IP-filtering. | Non-public dataset |
 
 ## How to unskip a script
 

@@ -4,7 +4,7 @@ on:
   workflow_dispatch:
     inputs:
       chunk:
-        description: 'Which chunk to run (1-12, or "all" for matrix)'
+        description: 'Which chunk to run (1-24, or "all" for matrix)'
         required: false
         default: 'all'
 
@@ -27,9 +27,10 @@ jobs:
           echo "Found $total scripts"
           echo "total=$total" >> $GITHUB_OUTPUT
           
-          # Create 12 chunks (about 10 scripts each)
+          # Create 24 chunks (about 5 scripts each) so CNN-heavy sections
+          # split across more runners instead of one runner training 10 CNNs serially.
           if [ "${{ github.event.inputs.chunk }}" = "all" ]; then
-            echo 'chunks=["1","2","3","4","5","6","7","8","9","10","11","12"]' >> $GITHUB_OUTPUT
+            echo 'chunks=["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"]' >> $GITHUB_OUTPUT
           else
             echo 'chunks=["${{ github.event.inputs.chunk }}"]' >> $GITHUB_OUTPUT
           fi
@@ -74,6 +75,11 @@ jobs:
           python -m spacy download en_core_web_sm || true
 
       - name: Run chunk ${{ matrix.chunk }}
+        env:
+          # Cap training epochs for CNN/deep-learning scripts to keep CI fast.
+          # Scripts read via: int(os.environ.get("CI_EPOCHS", <original>))
+          # Unset locally to run the full training as originally written.
+          CI_EPOCHS: "2"
         run: |
           mkdir -p results
           
@@ -89,6 +95,7 @@ jobs:
             "gesture_control_for_smarttv_model_6_7_8.py"
             "gesture_control_for_smarttv_model_9_10.py"
             "skin_cancer_detection_melanoma.py"
+            "working-with-chest-xray-images.py"
           )
           
           is_skipped() {
@@ -105,8 +112,8 @@ jobs:
           mapfile -t scripts < <(find . -name "*.py" -type f ! -path "./.github/*" | sort)
           total=${#scripts[@]}
           
-          # Calculate chunk boundaries (12 chunks)
-          chunk_size=$(( (total + 11) / 12 ))
+          # Calculate chunk boundaries (24 chunks)
+          chunk_size=$(( (total + 23) / 24 ))
           chunk=${{ matrix.chunk }}
           start=$(( (chunk - 1) * chunk_size ))
           end=$(( start + chunk_size ))
@@ -184,7 +191,7 @@ jobs:
           echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
           echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
           echo "| Total Scripts | ${{ needs.prepare.outputs.total }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Chunks | 12 |" >> $GITHUB_STEP_SUMMARY
+          echo "| Chunks | 24 |" >> $GITHUB_STEP_SUMMARY
           echo "| Results | $(ls all-results/*.log 2>/dev/null | wc -l) logs |" >> $GITHUB_STEP_SUMMARY
 
       - name: Upload combined results

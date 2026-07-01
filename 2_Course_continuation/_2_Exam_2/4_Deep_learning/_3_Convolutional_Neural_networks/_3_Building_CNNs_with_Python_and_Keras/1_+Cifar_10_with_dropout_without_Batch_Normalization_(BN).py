@@ -31,7 +31,7 @@ get_ipython().run_line_magic('matplotlib', 'inline')
 # batch, classes, epochs
 batch_size = 32
 num_classes = 10
-epochs = 50
+import os as _os_ci; epochs = int(_os_ci.environ.get('CI_EPOCHS', '50'))
 
 
 # In[3]:

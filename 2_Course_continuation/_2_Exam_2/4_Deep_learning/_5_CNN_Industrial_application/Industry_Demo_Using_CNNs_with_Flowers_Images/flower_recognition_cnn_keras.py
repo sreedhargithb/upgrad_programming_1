@@ -268,7 +268,7 @@ model.add(Dense(5, activation = "softmax"))
 
 
 batch_size=128
-epochs=50
+import os as _os_ci; epochs=int(_os_ci.environ.get('CI_EPOCHS', '50'))
 
 from keras.callbacks import ReduceLROnPlateau
 red_lr= ReduceLROnPlateau(monitor='val_acc',patience=3,verbose=1,factor=0.1)
