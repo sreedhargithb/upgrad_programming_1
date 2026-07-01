@@ -8,7 +8,7 @@ import plotly.graph_objs as go
 import plotly.tools as tls
 import seaborn as sns
 import matplotlib.pyplot as plt
-%matplotlib inline
+get_ipython().run_line_magic('matplotlib', 'inline')
 
 
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
@@ -29,8 +29,8 @@ warnings.filterwarnings('ignore')
 from sklearn.model_selection import GridSearchCV, RandomizedSearchCV, cross_val_score, learning_curve, train_test_split
 
 
-!pip install --upgrade --force-reinstall numpy scikit-learn xgboost joblib scipy
-!pip install --upgrade imbalanced-learn shap hdbscan jax opencv-python
+get_ipython().system('pip install --upgrade --force-reinstall numpy scikit-learn xgboost joblib scipy')
+get_ipython().system('pip install --upgrade imbalanced-learn shap hdbscan jax opencv-python')
 
 attrition = pd.read_csv('https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/2_Course_continuation/_2_Exam_2/3_Machine_learning_2/6_Boosting/2_Gradient%20Boosting/WA_Fn-UseC_-HR-Employee-Attrition.csv')
 attrition.head()
