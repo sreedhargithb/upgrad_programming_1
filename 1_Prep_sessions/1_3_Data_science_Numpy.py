@@ -42,13 +42,13 @@ heights_in = np.array(heights)
 # In[93]:
 
 
-heights_in
+print(heights_in)
 
 
 # In[94]:
 
 
-type(heights_in)
+print(type(heights_in))
 
 
 # <h4 style = "color : Sky blue"> Example - 2</h4>
@@ -58,13 +58,13 @@ type(heights_in)
 # In[95]:
 
 
-len(heights)
+print(len(heights))
 
 
 # In[96]:
 
 
-np.array(heights).shape
+print(np.array(heights).shape)
 
 
 # <h4 style = "color : Sky blue"> Example - 3</h4>
@@ -77,7 +77,7 @@ np.array(heights).shape
 heights = np.array(heights)
 heights_m = heights * 0.0254
 
-heights_m
+print(heights_m)
 
 
 # <h4 style = "color : Sky blue"> Example - 4</h4>
@@ -97,7 +97,7 @@ weights_lb = [180, 215, 210, 210, 188, 176, 209, 200, 231, 180, 188, 180, 185, 1
 
 weights_kg = np.array(weights_lb) * 0.453592
 
-weights_kg
+print(weights_kg)
 
 
 # In[100]:
@@ -107,7 +107,7 @@ weights_kg
 
 bmi = weights_kg / (heights_m ** 2)
 
-bmi
+print(bmi)
 
 
 # <h4 style = "color : Sky blue"> Sub-Setting Arrays</h4>
@@ -117,7 +117,7 @@ bmi
 # In[101]:
 
 
-bmi[0]
+print(bmi[0])
 
 
 # ##### Fetch the last element from the bmi array
@@ -125,7 +125,7 @@ bmi[0]
 # In[102]:
 
 
-bmi[-1]
+print(bmi[-1])
 
 
 # #####  Fetch the first 5 elements from the bmi array
@@ -133,7 +133,7 @@ bmi[-1]
 # In[103]:
 
 
-bmi[0:5]
+print(bmi[0:5])
 
 
 # ##### Fetch the last 5 elements from the bmi array
@@ -141,7 +141,7 @@ bmi[0:5]
 # In[104]:
 
 
-bmi[-5:]
+print(bmi[-5:])
 
 
 # <h4 style = "color : Sky blue"> Conditional Sub-Setting Arrays</h4>
@@ -158,20 +158,20 @@ bmi < 21
 # In[106]:
 
 
-bmi [ bmi<21]
+print(bmi [ bmi<21])
 
 
 # In[107]:
 
 
 underweight_players = bmi [ bmi<21]
-underweight_players
+print(underweight_players)
 
 
 # In[108]:
 
 
-underweight_players.size
+print(underweight_players.size)
 
 
 # <h4 style = "color : Sky blue"> NumPy Functions</h4>
@@ -181,13 +181,13 @@ underweight_players.size
 # In[109]:
 
 
-max(bmi)
+print(max(bmi))
 
 
 # In[110]:
 
 
-bmi.max()
+print(bmi.max())
 
 
 # ##### Find lowest BMI value
@@ -195,7 +195,7 @@ bmi.max()
 # In[111]:
 
 
-bmi.min()
+print(bmi.min())
 
 
 # ##### Find average BMI value
@@ -203,7 +203,7 @@ bmi.min()
 # In[112]:
 
 
-bmi.mean()
+print(bmi.mean())
 
 
 # <a id='Exercise_1'>Exercise_1</a>
@@ -231,10 +231,10 @@ import numpy as np
 X = np.random.randint(0,high = 10001, size = (25000,15))
 
 # print the shape of X
-X.shape
+print(X.shape)
 
 # print the first row of X
-X[1]
+print(X[1])
 
 # Now that you created the array we will mean normalize it. The equation for normalisaing the data is given below:
 
@@ -318,7 +318,7 @@ print (np.average(X_norm.max(axis = 0)))
 row_indices = np.random.permutation(np.arange(0,25000))
 
 # Print the shape of row_indices
-row_indices.shape
+print(row_indices.shape)
 
 #**Question 2.2** Split the row indexes in the needed proportions. You can use the slicing methods you have learnt in this session to make the job easier.
 
@@ -370,17 +370,17 @@ display(HTML('''
 # list of height and weight of the players.
 players = [(74, 180), (74, 215), (72, 210), (72, 210), (73, 188), (69, 176), (69, 209), (71, 200), (76, 231), (71, 180), (73, 188), (73, 180), (74, 185), (74, 160), (69, 180), (70, 185), (73, 189), (75, 185), (78, 219), (79, 230), (76, 205), (74, 230), (76, 195), (72, 180), (71, 192), (75, 225), (77, 203), (74, 195), (73, 182), (74, 188), (78, 200), (73, 180), (75, 200), (73, 200), (75, 245), (75, 240), (74, 215), (69, 185), (71, 175), (74, 199), (73, 200), (73, 215), (76, 200), (74, 205), (74, 206), (70, 186), (72, 188), (77, 220), (74, 210), (70, 195), (73, 200), (75, 200), (76, 212), (76, 224), (78, 210), (74, 205), (74, 220), (76, 195), (77, 200), (81, 260), (78, 228), (75, 270), (77, 200), (75, 210), (76, 190), (74, 220), (72, 180), (72, 205), (75, 210), (73, 220), (73, 211), (73, 200), (70, 180), (70, 190), (70, 170), (76, 230), (68, 155), (71, 185), (72, 185), (75, 200), (75, 225), (75, 225), (75, 220), (68, 160), (74, 205), (78, 235), (71, 250), (73, 210), (76, 190), (74, 160), (74, 200), (79, 205), (75, 222), (73, 195), (76, 205), (74, 220), (74, 220), (73, 170), (72, 185), (74, 195), (73, 220), (74, 230), (72, 180), (73, 220), (69, 180), (72, 180), (73, 170), (75, 210), (75, 215), (73, 200), (72, 213), (72, 180), (76, 192), (74, 235), (72, 185), (77, 235), (74, 210), (77, 222), (75, 210), (76, 230), (80, 220), (74, 180), (74, 190), (75, 200), (78, 210), (73, 194), (73, 180), (74, 190), (75, 240), (76, 200), (71, 198), (73, 200), (74, 195), (76, 210), (76, 220), (74, 190), (73, 210), (74, 225), (70, 180), (72, 185), (73, 170), (73, 185), (73, 185), (73, 180), (71, 178), (74, 175), (74, 200), (72, 204), (74, 211), (71, 190), (74, 210), (73, 190), (75, 190), (75, 185), (79, 290), (73, 175), (75, 185), (76, 200), (74, 220), (76, 170), (78, 220), (74, 190), (76, 220), (72, 205), (74, 200), (76, 250), (74, 225), (75, 215), (78, 210), (75, 215), (72, 195), (74, 200), (72, 194), (74, 220), (70, 180), (71, 180), (70, 170), (75, 195), (71, 180), (71, 170), (73, 206), (72, 205), (71, 200), (73, 225), (72, 201), (75, 225), (74, 233), (74, 180), (75, 225), (73, 180), (77, 220), (73, 180), (76, 237), (75, 215), (74, 190), (76, 235), (75, 190), (73, 180), (71, 165), (76, 195), (75, 200), (72, 190), (71, 190), (77, 185), (73, 185), (74, 205), (71, 190), (72, 205), (74, 206), (75, 220), (73, 208), (72, 170), (75, 195), (75, 210), (74, 190), (72, 211), (74, 230), (71, 170), (70, 185), (74, 185), (77, 241), (77, 225), (75, 210), (75, 175), (78, 230), (75, 200), (76, 215), (73, 198), (75, 226), (75, 278), (79, 215), (77, 230), (76, 240), (71, 184), (75, 219), (74, 170), (69, 218), (71, 190), (76, 225), (72, 220), (72, 176), (70, 190), (72, 197), (73, 204), (71, 167), (72, 180), (71, 195), (73, 220), (72, 215), (73, 185), (74, 190), (74, 205), (72, 205), (75, 200), (74, 210), (74, 215), (77, 200), (75, 205), (73, 211), (72, 190), (71, 208), (74, 200), (77, 210), (75, 232), (75, 230), (75, 210), (78, 220), (78, 210), (74, 202), (76, 212), (78, 225), (76, 170), (70, 190), (72, 200), (80, 237), (74, 220), (74, 170), (71, 193), (70, 190), (72, 150), (71, 220), (74, 200), (71, 190), (72, 185), (71, 185), (74, 200), (69, 172), (76, 220), (75, 225), (75, 190), (76, 195), (73, 219), (76, 190), (73, 197), (77, 200), (73, 195), (72, 210), (72, 177), (77, 220), (77, 235), (71, 180), (74, 195), (74, 195), (73, 190), (78, 230), (75, 190), (73, 200), (70, 190), (74, 190), (72, 200), (73, 200), (73, 184), (75, 200), (75, 180), (74, 219), (76, 187), (73, 200), (74, 220), (75, 205), (75, 190), (72, 170), (73, 160), (73, 215), (72, 175), (74, 205), (78, 200), (76, 214), (73, 200), (74, 190), (75, 180), (70, 205), (75, 220), (71, 190), (72, 215), (78, 235), (75, 191), (73, 200), (73, 181), (71, 200), (75, 210), (77, 240), (72, 185), (69, 165), (73, 190), (74, 185), (72, 175), (70, 155), (75, 210), (70, 170), (72, 175), (72, 220), (74, 210), (73, 205), (74, 200), (76, 205), (75, 195), (80, 240), (72, 150), (75, 200), (73, 215), (74, 202), (74, 200), (73, 190), (75, 205), (75, 190), (71, 160), (73, 215), (75, 185), (74, 200), (74, 190), (72, 210), (74, 185), (74, 220), (74, 190), (73, 202), (76, 205), (75, 220), (72, 175), (73, 160), (73, 190), (73, 200), (72, 229), (72, 206), (72, 220), (72, 180), (71, 195), (75, 175), (75, 188), (74, 230), (73, 190), (75, 200), (79, 190), (74, 219), (76, 235), (73, 180), (74, 180), (74, 180), (72, 200), (74, 234), (74, 185), (75, 220), (78, 223), (74, 200), (74, 210), (74, 200), (77, 210), (70, 190), (73, 177), (74, 227), (73, 180), (71, 195), (75, 199), (71, 175), (72, 185), (77, 240), (74, 210), (70, 180), (77, 194), (73, 225), (72, 180), (76, 205), (71, 193), (76, 230), (78, 230), (75, 220), (73, 200), (78, 249), (74, 190), (79, 208), (75, 245), (76, 250), (72, 160), (75, 192), (75, 220), (70, 170), (72, 197), (70, 155), (74, 190), (71, 200), (76, 220), (73, 210), (76, 228), (71, 190), (69, 160), (72, 184), (72, 180), (69, 180), (73, 200), (69, 176), (73, 160), (74, 222), (74, 211), (72, 195), (71, 200), (72, 175), (72, 206), (76, 240), (76, 185), (76, 260), (74, 185), (76, 221), (75, 205), (71, 200), (72, 170), (71, 201), (73, 205), (75, 185), (76, 205), (75, 245), (71, 220), (75, 210), (74, 220), (72, 185), (73, 175), (73, 170), (73, 180), (73, 200), (76, 210), (72, 175), (76, 220), (73, 206), (73, 180), (73, 210), (75, 195), (75, 200), (77, 200), (73, 164), (72, 180), (75, 220), (70, 195), (74, 205), (72, 170), (80, 240), (71, 210), (71, 195), (74, 200), (74, 205), (73, 192), (75, 190), (76, 170), (73, 240), (77, 200), (72, 205), (73, 175), (77, 250), (76, 220), (71, 224), (75, 210), (73, 195), (74, 180), (77, 245), (71, 175), (72, 180), (73, 215), (69, 175), (73, 180), (70, 195), (74, 230), (76, 230), (73, 205), (73, 215), (75, 195), (73, 180), (79, 205), (74, 180), (73, 190), (74, 180), (77, 190), (75, 190), (74, 220), (73, 210), (77, 255), (73, 190), (77, 230), (74, 200), (74, 205), (73, 210), (77, 225), (74, 215), (77, 220), (75, 205), (77, 200), (75, 220), (71, 197), (74, 225), (70, 187), (79, 245), (72, 185), (72, 185), (70, 175), (74, 200), (74, 180), (72, 188), (73, 225), (72, 200), (74, 210), (74, 245), (76, 213), (82, 231), (74, 165), (74, 228), (70, 210), (73, 250), (73, 191), (74, 190), (77, 200), (72, 215), (76, 254), (73, 232), (73, 180), (72, 215), (74, 220), (74, 180), (71, 200), (72, 170), (75, 195), (74, 210), (74, 200), (77, 220), (70, 165), (71, 180), (73, 200), (76, 200), (71, 170), (75, 224), (74, 220), (72, 180), (76, 198), (79, 240), (76, 239), (73, 185), (76, 210), (78, 220), (75, 200), (76, 195), (72, 220), (72, 230), (73, 170), (73, 220), (75, 230), (71, 165), (76, 205), (70, 192), (75, 210), (74, 205), (75, 200), (73, 210), (71, 185), (71, 195), (72, 202), (73, 205), (73, 195), (72, 180), (69, 200), (73, 185), (78, 240), (71, 185), (73, 220), (75, 205), (76, 205), (70, 180), (74, 201), (77, 190), (75, 208), (79, 240), (72, 180), (77, 230), (73, 195), (75, 215), (75, 190), (75, 195), (73, 215), (73, 215), (76, 220), (77, 220), (75, 230), (70, 195), (71, 190), (71, 195), (75, 209), (74, 204), (69, 170), (70, 185), (75, 205), (72, 175), (75, 210), (73, 190), (72, 180), (72, 180), (72, 160), (76, 235), (75, 200), (74, 210), (69, 180), (73, 190), (72, 197), (72, 203), (75, 205), (77, 170), (76, 200), (80, 250), (77, 200), (76, 220), (79, 200), (71, 190), (75, 170), (73, 190), (76, 220), (77, 215), (73, 206), (76, 215), (70, 185), (75, 235), (73, 188), (75, 230), (70, 195), (69, 168), (71, 190), (72, 160), (72, 200), (73, 200), (70, 189), (70, 180), (73, 190), (76, 200), (75, 220), (72, 187), (73, 240), (79, 190), (71, 180), (72, 185), (74, 210), (74, 220), (74, 219), (72, 190), (76, 193), (76, 175), (72, 180), (72, 215), (71, 210), (72, 200), (72, 190), (70, 185), (77, 220), (74, 170), (72, 195), (76, 205), (71, 195), (76, 210), (71, 190), (73, 190), (70, 180), (73, 220), (73, 190), (72, 186), (71, 185), (71, 190), (71, 180), (72, 190), (72, 170), (74, 210), (74, 240), (74, 220), (71, 180), (72, 210), (75, 210), (72, 195), (71, 160), (72, 180), (72, 205), (72, 200), (72, 185), (74, 245), (74, 190), (77, 210), (75, 200), (73, 200), (75, 222), (73, 215), (76, 240), (72, 170), (77, 220), (75, 156), (72, 190), (71, 202), (71, 221), (75, 200), (72, 190), (73, 210), (73, 190), (71, 200), (70, 165), (75, 190), (71, 185), (76, 230), (73, 208), (68, 209), (71, 175), (72, 180), (74, 200), (77, 205), (72, 200), (76, 250), (78, 210), (81, 230), (72, 244), (73, 202), (76, 240), (72, 200), (72, 215), (74, 177), (76, 210), (73, 170), (76, 215), (75, 217), (70, 198), (71, 200), (74, 220), (72, 170), (73, 200), (76, 230), (76, 231), (73, 183), (71, 192), (68, 167), (71, 190), (71, 180), (74, 180), (77, 215), (69, 160), (72, 205), (76, 223), (75, 175), (76, 170), (75, 190), (76, 240), (72, 175), (74, 230), (76, 223), (74, 196), (72, 167), (75, 195), (78, 190), (77, 250), (70, 190), (72, 190), (79, 190), (74, 170), (71, 160), (68, 150), (77, 225), (75, 220), (71, 209), (72, 210), (70, 176), (72, 260), (72, 195), (73, 190), (72, 184), (74, 180), (72, 195), (72, 195), (75, 219), (72, 225), (73, 212), (74, 202), (72, 185), (78, 200), (75, 209), (72, 200), (74, 195), (75, 228), (75, 210), (76, 190), (74, 212), (74, 190), (73, 218), (74, 220), (71, 190), (74, 235), (75, 210), (76, 200), (74, 188), (76, 210), (76, 235), (73, 188), (75, 215), (75, 216), (74, 220), (68, 180), (72, 185), (75, 200), (71, 210), (70, 220), (72, 185), (73, 231), (72, 210), (75, 195), (74, 200), (70, 205), (76, 200), (71, 190), (82, 250), (72, 185), (73, 180), (74, 170), (71, 180), (75, 208), (77, 235), (72, 215), (74, 244), (72, 220), (73, 185), (78, 230), (77, 190), (73, 200), (73, 180), (73, 190), (73, 196), (73, 180), (76, 230), (75, 224), (70, 160), (73, 178), (72, 205), (73, 185), (75, 210), (74, 180), (73, 190), (73, 200), (76, 257), (73, 190), (75, 220), (70, 165), (77, 205), (72, 200), (77, 208), (74, 185), (75, 215), (75, 170), (75, 235), (75, 210), (72, 170), (74, 180), (71, 170), (76, 190), (71, 150), (75, 230), (76, 203), (83, 260), (75, 246), (74, 186), (76, 210), (72, 198), (72, 210), (75, 215), (75, 180), (72, 200), (77, 245), (73, 200), (72, 192), (70, 192), (74, 200), (72, 192), (74, 205), (72, 190), (71, 186), (70, 170), (71, 197), (76, 219), (74, 200), (76, 220), (74, 207), (74, 225), (74, 207), (75, 212), (75, 225), (71, 170), (71, 190), (74, 210), (77, 230), (71, 210), (74, 200), (75, 238), (77, 234), (76, 222), (74, 200), (76, 190), (72, 170), (71, 220), (72, 223), (75, 210), (73, 215), (68, 196), (72, 175), (69, 175), (73, 189), (73, 205), (75, 210), (70, 180), (70, 180), (74, 197), (75, 220), (74, 228), (74, 190), (73, 204), (74, 165), (75, 216), (77, 220), (73, 208), (74, 210), (76, 215), (74, 195), (75, 200), (73, 215), (76, 229), (78, 240), (75, 207), (73, 205), (77, 208), (74, 185), (72, 190), (74, 170), (72, 208), (71, 225), (73, 190), (75, 225), (73, 185), (67, 180), (67, 165), (76, 240), (74, 220), (73, 212), (70, 163), (75, 215), (70, 175), (72, 205), (77, 210), (79, 205), (78, 208), (74, 215), (75, 180), (75, 200), (78, 230), (76, 211), (75, 230), (69, 190), (75, 220), (72, 180), (75, 205), (73, 190), (74, 180), (75, 205), (75, 190), (73, 195)]
 
-len(players)
+print(len(players))
 
-players[1][1]
+print(players[1][1])
 
 import numpy as np
 
 np_players = np.array(players)
 
-np_players
+print(np_players)
 
-type(np_players)
+print(type(np_players))
 
 
 
@@ -390,19 +390,19 @@ display(HTML('''
 
 ##### Print the structure of the 2-D Array
 
-np_players.shape
+print(np_players.shape)
 
 ##### Print the dimensions of the array
 
-np_players.ndim
+print(np_players.ndim)
 
 ##### Print the data type of elements in the array
 
-np_players.dtype
+print(np_players.dtype)
 
 ##### Print the size of a single item of the array
 
-np_players.itemsize
+print(np_players.itemsize)
 
 display(HTML('''
 <h4 style = "color : Sky blue"> Example - 3</h4>
@@ -412,7 +412,7 @@ display(HTML('''
 
 players_converted = np_players * [0.0254, 0.453592]
 
-players_converted
+print(players_converted)
 
 display(HTML('''
 <h4 style = "color : Sky blue"> Sub-Setting 2-D Arrays</h4>
@@ -420,21 +420,21 @@ display(HTML('''
 
 ##### Fetch the first row from the array
 
-players_converted[0]
+print(players_converted[0])
 
 ##### Fetch the first row 2nd element from the array
 
-players_converted[0][1]
+print(players_converted[0][1])
 
 ##### Fetch the first column from the array
 
-players_converted[:, 0]
+print(players_converted[:, 0])
 
 ##### Fetch the height (1st column) of 125th player from the array
 
-players_converted[124][0]
+print(players_converted[124][0])
 
-players_converted[124,0]
+print(players_converted[124,0])
 
 display(HTML('''
 <h4 style = "color : Sky blue"> Conditional Sub-Setting Arrays</h4>
@@ -445,22 +445,22 @@ display(HTML('''
 
 tall_players = players_converted[players_converted[:,0] > 1.8]
 
-players_converted.shape
+print(players_converted.shape)
 
-tall_players.shape
+print(tall_players.shape)
 
 ##### Skills Array - holds the player key skills.
 
 skills = np.array(['Keeper', 'Batsman', 'Bowler', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Batsman', 'Bowler', 'Batsman', 'Batsman', 'Bowler', 'Bowler', 'Bowler', 'Batsman', 'Keeper-Batsman', 'Bowler', 'Keeper-Batsman', 'Batsman', 'Keeper', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper', 'Keeper-Batsman', 'Keeper', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Bowler', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper', 'Batsman', 'Keeper', 'Bowler', 'Keeper-Batsman', 'Keeper', 'Bowler', 'Keeper', 'Keeper', 'Keeper', 'Keeper', 'Bowler', 'Keeper-Batsman', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper', 'Keeper', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Keeper', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Bowler', 'Bowler', 'Batsman', 'Batsman', 'Batsman', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Bowler', 'Bowler', 'Batsman', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Bowler', 'Bowler', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Bowler', 'Batsman', 'Batsman', 'Keeper', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Bowler', 'Keeper', 'Keeper-Batsman', 'Batsman', 'Keeper', 'Batsman', 'Batsman', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Bowler', 'Batsman', 'Keeper', 'Bowler', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Bowler', 'Keeper', 'Batsman', 'Keeper-Batsman', 'Bowler', 'Keeper-Batsman', 'Bowler', 'Bowler', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Bowler', 'Keeper', 'Keeper-Batsman', 'Batsman', 'Keeper', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper', 'Keeper', 'Batsman', 'Keeper-Batsman', 'Keeper', 'Keeper-Batsman', 'Batsman', 'Keeper', 'Bowler', 'Keeper-Batsman', 'Keeper', 'Keeper', 'Keeper-Batsman', 'Batsman', 'Keeper', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Bowler', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Bowler', 'Bowler', 'Keeper-Batsman', 'Bowler', 'Keeper', 'Batsman', 'Bowler', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Bowler', 'Keeper-Batsman', 'Keeper', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Keeper', 'Keeper-Batsman', 'Batsman', 'Keeper', 'Keeper', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Bowler', 'Bowler', 'Bowler', 'Bowler', 'Bowler', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Bowler', 'Batsman', 'Keeper', 'Batsman', 'Keeper', 'Bowler', 'Bowler', 'Keeper', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Bowler', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Keeper', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Bowler', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Bowler', 'Bowler', 'Keeper', 'Bowler', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Keeper', 'Bowler', 'Bowler', 'Batsman', 'Keeper-Batsman', 'Bowler', 'Batsman', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Bowler', 'Batsman', 'Batsman', 'Batsman', 'Bowler', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper', 'Batsman', 'Batsman', 'Batsman', 'Keeper', 'Batsman', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Bowler', 'Keeper', 'Batsman', 'Keeper-Batsman', 'Bowler', 'Batsman', 'Bowler', 'Bowler', 'Bowler', 'Batsman', 'Keeper', 'Bowler', 'Bowler', 'Batsman', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Bowler', 'Keeper', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper', 'Bowler', 'Keeper', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper', 'Keeper-Batsman', 'Keeper', 'Bowler', 'Batsman', 'Bowler', 'Batsman', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper', 'Keeper', 'Keeper', 'Batsman', 'Bowler', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Bowler', 'Keeper', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Bowler', 'Keeper', 'Batsman', 'Bowler', 'Keeper', 'Keeper', 'Batsman', 'Bowler', 'Bowler', 'Batsman', 'Keeper', 'Keeper', 'Keeper-Batsman', 'Batsman', 'Bowler', 'Keeper-Batsman', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Bowler', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Bowler', 'Keeper', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper', 'Keeper-Batsman', 'Bowler', 'Batsman', 'Bowler', 'Bowler', 'Keeper', 'Keeper-Batsman', 'Bowler', 'Keeper-Batsman', 'Bowler', 'Keeper-Batsman', 'Keeper', 'Keeper-Batsman', 'Keeper-Batsman', 'Bowler', 'Bowler', 'Batsman', 'Bowler', 'Keeper', 'Batsman', 'Keeper-Batsman', 'Bowler', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper', 'Keeper-Batsman', 'Batsman', 'Bowler', 'Bowler', 'Batsman', 'Batsman', 'Batsman', 'Keeper', 'Keeper', 'Keeper-Batsman', 'Bowler', 'Batsman', 'Keeper', 'Keeper-Batsman', 'Batsman', 'Keeper', 'Batsman', 'Batsman', 'Keeper', 'Batsman', 'Keeper-Batsman', 'Bowler', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Bowler', 'Batsman', 'Keeper', 'Bowler', 'Keeper', 'Bowler', 'Batsman', 'Keeper', 'Keeper', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper', 'Bowler', 'Batsman', 'Keeper', 'Bowler', 'Keeper', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Keeper', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper', 'Batsman', 'Bowler', 'Keeper', 'Bowler', 'Batsman', 'Batsman', 'Bowler', 'Batsman', 'Batsman', 'Bowler', 'Bowler', 'Bowler', 'Batsman', 'Keeper', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Batsman', 'Bowler', 'Keeper-Batsman', 'Bowler', 'Keeper-Batsman', 'Bowler', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper', 'Batsman', 'Bowler', 'Keeper', 'Bowler', 'Bowler', 'Batsman', 'Keeper-Batsman', 'Keeper', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Keeper', 'Keeper', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Batsman', 'Batsman', 'Keeper', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper', 'Bowler', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Bowler', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper', 'Keeper-Batsman', 'Bowler', 'Batsman', 'Keeper-Batsman', 'Bowler', 'Keeper', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Bowler', 'Bowler', 'Batsman', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Bowler', 'Batsman', 'Batsman', 'Bowler', 'Keeper-Batsman', 'Keeper', 'Bowler', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper', 'Keeper-Batsman', 'Batsman', 'Keeper', 'Batsman', 'Batsman', 'Keeper', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Bowler', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Keeper', 'Keeper', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Bowler', 'Keeper', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper', 'Bowler', 'Bowler', 'Keeper-Batsman', 'Bowler', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Bowler', 'Batsman', 'Keeper', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Bowler', 'Bowler', 'Keeper', 'Batsman', 'Keeper-Batsman', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Bowler', 'Bowler', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Bowler', 'Keeper-Batsman', 'Batsman', 'Bowler', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Bowler', 'Keeper', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Bowler', 'Batsman', 'Bowler', 'Keeper-Batsman', 'Batsman', 'Bowler', 'Bowler', 'Keeper', 'Bowler', 'Keeper-Batsman', 'Bowler', 'Batsman', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Bowler', 'Bowler', 'Bowler', 'Batsman', 'Keeper', 'Keeper', 'Keeper-Batsman', 'Bowler', 'Keeper', 'Keeper-Batsman', 'Bowler', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper', 'Batsman', 'Bowler', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Bowler', 'Keeper', 'Keeper', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Bowler', 'Bowler', 'Keeper', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Bowler', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Batsman', 'Bowler', 'Keeper', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Bowler', 'Batsman', 'Batsman', 'Bowler', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Bowler', 'Keeper-Batsman', 'Bowler', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Bowler', 'Bowler', 'Keeper', 'Bowler', 'Keeper', 'Batsman', 'Batsman', 'Keeper', 'Keeper-Batsman', 'Keeper', 'Bowler', 'Keeper', 'Keeper-Batsman', 'Batsman', 'Keeper', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper', 'Batsman', 'Keeper', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper', 'Bowler', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper', 'Keeper', 'Keeper', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper', 'Keeper-Batsman', 'Bowler', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Bowler', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Bowler', 'Batsman', 'Keeper-Batsman', 'Bowler', 'Batsman', 'Keeper-Batsman', 'Keeper', 'Keeper-Batsman', 'Keeper-Batsman', 'Bowler', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper', 'Bowler', 'Keeper-Batsman', 'Bowler', 'Batsman', 'Bowler', 'Bowler', 'Keeper', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Bowler', 'Keeper-Batsman', 'Bowler', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Bowler', 'Keeper', 'Bowler', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Bowler', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Keeper', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Bowler', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Batsman', 'Batsman', 'Bowler', 'Batsman', 'Batsman', 'Keeper-Batsman', 'Bowler', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Batsman', 'Batsman', 'Batsman', 'Keeper', 'Keeper-Batsman', 'Batsman', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Batsman', 'Batsman', 'Bowler', 'Batsman', 'Keeper', 'Bowler', 'Bowler', 'Keeper', 'Bowler', 'Bowler', 'Keeper', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Keeper-Batsman', 'Keeper-Batsman', 'Bowler', 'Bowler', 'Bowler', 'Batsman', 'Bowler', 'Keeper-Batsman', 'Keeper-Batsman', 'Batsman', 'Bowler', 'Keeper', 'Keeper-Batsman', 'Batsman', 'Bowler', 'Keeper-Batsman'])
-skills
+print(skills)
 
 ##### Fetch Heights of the Batsmen
 
 batsmen = players_converted[skills == 'Batsman']
 
-batsmen.shape
+print(batsmen.shape)
 
-batsmen[:, 0]
+print(batsmen[:, 0])
 
 
 
@@ -489,21 +489,21 @@ help(np.ones)
 ##### Creating a 1 D array of ones
 
 arr = np.ones(5)
-arr
+print(arr)
 
 ##### Notice that, by default, numpy creates data type = float64
 
 
 
-arr.dtype
+print(arr.dtype)
 
 ##### Can provide dtype explicitly using dtype
 
 
 arr = np.ones(5, dtype=int)
-arr
+print(arr)
 
-arr.dtype
+print(arr.dtype)
 
 ##### Creating a 5  x 3 array of ones
 
@@ -519,7 +519,7 @@ np.zeros(5)
 np.zeros(5, dtype=int)
 
 # Create a list of integers range between 1 to 5.
-list(range(1,5))
+print(list(range(1,5)))
 
 np.arange(3)
 
@@ -595,14 +595,14 @@ display(HTML('''
 array1 = np.array([10,20,30,40,50])
 array2 = np.arange(5)
 
-array1
+print(array1)
 
-array2
+print(array2)
 
 # Add array1 and array2.
 array3 = array1 + array2
 
-array3
+print(array3)
 
 display(HTML('''
 <h4 style = "color : Sky blue"> Example - 2</h4>
@@ -622,7 +622,7 @@ display(HTML('''
 
 
 array = np.linspace(1, 10, 5)
-array
+print(array)
 
 array*2
 
@@ -661,16 +661,16 @@ display(HTML('''
 '''))
 
 
-array1
+print(array1)
 
 np.power(array1, 3)
 
 np.arange(9).reshape(3,3)
 
 x = np.array([-2,-1, 0, 1,2])
-x
+print(x)
 
-abs(x)
+print(abs(x))
 
 np.absolute(x)
 
@@ -678,11 +678,11 @@ display(HTML('''
 <h4 style = "color : Sky blue"> Example - 5 (Trignometric functions)</h4>
 '''))
 
-np.pi
+print(np.pi)
 
 theta = np.linspace(0, np.pi, 5)
 
-theta
+print(theta)
 
 np.sin(theta)
 
@@ -710,7 +710,7 @@ np.log2(x)
 
 np.log10(x)
 
-np.log
+print(np.log)
 
 display(HTML('''
 <h4 style = "color : Sky blue"> Example - 7</h4>
@@ -718,24 +718,24 @@ display(HTML('''
 
 
 x = np.arange(5)
-x
+print(x)
 
 y = x * 10
-y
+print(y)
 
 y = np.empty(5)
-y
+print(y)
 
 np.multiply(x, 12, out=y)
 
-y
+print(y)
 
 y = np.zeros(10)
-y
+print(y)
 
 np.power(2, x, out=y[::2])
 
-y
+print(y)
 
 display(HTML('''
 <h4 style = "color : Sky blue"> Example - 8 (Aggregates)</h4>
@@ -743,9 +743,9 @@ display(HTML('''
 
 
 x = np.arange(1,6)
-x
+print(x)
 
-sum(x)
+print(sum(x))
 
 np.add.reduce(x)
 
@@ -772,7 +772,7 @@ A = np.array([[6, 1, 1],
               [4, -2, 5],
               [2, 8, 7]])
 
-A
+print(A)
 
 ##### Rank of a matrix
 
@@ -788,7 +788,7 @@ np.linalg.det(A)
 
 ##### Inverse of matrix A
 
-A
+print(A)
 
 np.linalg.inv(A)
 

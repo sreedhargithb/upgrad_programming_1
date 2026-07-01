@@ -18,7 +18,7 @@ warnings.filterwarnings('ignore')
 #Importing  the Dataset
 df = pd.read_csv('https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/2_Course_continuation/_2_Exam_2/3_Machine_learning_2/6_Boosting/1_Introduction%20to%20Boosting/WA_Fn-UseC_-HR-Employee-Attrition.csv')
 
-df.head(3)
+print(df.head(3))
 
 # Dep Var - Attrition ( Yes/No) - Binary Classification Problem 
 
@@ -33,15 +33,15 @@ plt.show()
 missing_col = df.columns[df.isnull().any()].values
 print('The missing columns in the dataset are: ',missing_col)
 
-df.isnull().sum()
+print(df.isnull().sum())
 
-df.info()
+print(df.info())
 
-df.dtypes
+print(df.dtypes)
 
-df['JobRole'].head()
+print(df['JobRole'].head())
 
-df.shape
+print(df.shape)
 
 #Extracting the Numeric and Categorical features
 df_num = pd.DataFrame(data = df.select_dtypes(include = ['int64']))
@@ -54,7 +54,7 @@ df_cat = df_cat.drop(['Attrition'], axis=1)
 
 #Encoding using Pandas' get_dummies
 df_cat_encoded = pd.get_dummies(df_cat)
-df_cat_encoded.head(5)
+print(df_cat_encoded.head(5))
 
 #Combining the Categorical and Numeric features
 df_transformed_final = pd.concat([df_num,df_cat_encoded], axis = 1)

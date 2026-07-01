@@ -57,3 +57,8 @@
 # Jupyter Notebook checkpoints
 .ipynb_checkpoints/
 */.ipynb_checkpoints/*
+
+# Python bytecode caches
+__pycache__/
+*.py[cod]
+*$py.class

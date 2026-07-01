@@ -17,7 +17,7 @@ from sklearn.metrics import accuracy_score
 
 
 df= pd.read_csv('https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/2_Course_continuation/_2_Exam_2/4_Deep_learning/_1_2_Intro_to_neural_networks/_1_Feedforward_neural_networks/house_price_full.csv')
-df.head()
+print(df.head())
 
 
 # In[ ]:
@@ -39,13 +39,13 @@ Y = np.log(Y)
 
 
 df_scaled = pd.DataFrame(X)
-df_scaled
+print(df_scaled)
 
 
 # In[ ]:
 
 
-Y
+print(Y)
 
 
 # In[6]:
@@ -59,7 +59,7 @@ x1, x2 = df_scaled.iloc[0]
 
 
 x = tf.constant([[x1,x2]], dtype=tf.float32)
-x
+print(x)
 
 
 # ### Part2: Forward Propagation with a single Neuron
@@ -281,7 +281,7 @@ Z2 = tf.matmul(W2,H1)+B2
 # In[22]:
 
 
-Z2
+print(Z2)
 
 
 # In[23]:
@@ -449,25 +449,25 @@ gw1, gb1, gw2, gb2 = tape.gradient(loss, [w1, b1, w2, b2])
 # In[39]:
 
 
-gw1
+print(gw1)
 
 
 # In[ ]:
 
 
-gb1
+print(gb1)
 
 
 # In[ ]:
 
 
-gw2
+print(gw2)
 
 
 # In[ ]:
 
 
-gb2
+print(gb2)
 
 
 # In[ ]:

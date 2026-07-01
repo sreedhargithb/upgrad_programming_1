@@ -46,8 +46,8 @@ print(vectorizer.get_feature_names_out())
 
 # load data
 spam = pd.read_csv("https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/2_Course_continuation/_3_NLP/_1_Lexical_processing/_2_Basic_lexical_processing/_2_SMSSpamCollection.txt", sep = "\t", names=["label", "message"])
-spam.shape
-spam.head()
+print(spam.shape)
+print(spam.head())
 
 spam = spam.iloc[0:100,:]
 print(spam)
@@ -73,7 +73,7 @@ pd.DataFrame(bow_model.toarray(), columns = vectorizer.get_feature_names_out())
 
 print(vectorizer.get_feature_names_out())
 
-bow_model.shape
+print(bow_model.shape)
 
 import datetime, pytz; 
 print("Current Time in IST:", datetime.datetime.now(pytz.utc).astimezone(pytz.timezone('Asia/Kolkata')).strftime('%Y-%m-%d %H:%M:%S'))

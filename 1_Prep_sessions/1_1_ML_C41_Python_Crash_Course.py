@@ -63,7 +63,7 @@ display(HTML('<h3>Variables</h3>'))
 var, Var, _var = 3,4,5
 print(var, Var, _var)
 __var__ = 34
-__var__
+print(__var__)
 
 
 # In[30]:
@@ -138,7 +138,7 @@ display(HTML('<h3>String operations</h3>'))
 a = "python class"
 b = print("b is:",a)
 str = "this is "
-b
+print(b)
 print(str + a)
 del str          # to delete a variable
 #print(str + a)  # error (because "str" is now a datatype and not variable)
@@ -492,7 +492,7 @@ print(",".join([str(i) for i in range(2000,3201) if(i%7==0 and i%5!=0)]))
 
 
 import sys
-sys.version
+print(sys.version)
 
 ######################## START: Taking Input in Python  ########################
 # # In[6]:

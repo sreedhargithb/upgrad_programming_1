@@ -80,11 +80,16 @@ from tensorflow.keras.utils import get_file
 
 
 import os
+import tempfile
 import git
 
 # Define the repository and directory path
 repo_url = "https://github.com/aqwertyuiop48/upgrad_programming"
-repo_path = "/content/upgrad_programming"
+# Use a portable path: Colab's /content when available, else system temp dir
+if os.path.isdir("/content"):
+    repo_path = "/content/upgrad_programming"
+else:
+    repo_path = os.path.join(tempfile.gettempdir(), "upgrad_programming")
 subdir_path = "2_Course_continuation/_2_Exam_2/4_Deep_learning/_6_Recurrent_Neural_Networks"
 
 # Clone the repository

@@ -39,7 +39,7 @@ tokenizer.fit_on_texts(sentences)
 # In[4]:
 
 
-tokenizer.word_index
+print(tokenizer.word_index)
 
 
 # In[5]:
@@ -71,13 +71,13 @@ train_sample = embedding(train_sequence)
 # In[8]:
 
 
-train_sequence.shape
+print(train_sequence.shape)
 
 
 # In[9]:
 
 
-train_sample.shape
+print(train_sample.shape)
 
 
 # In[10]:
@@ -90,7 +90,7 @@ with tsensor.explain(fontname='Hack', dimfontname='Hack'):
 # In[11]:
 
 
-train_sample[0]
+print(train_sample[0])
 
 
 # ## Averaging across tokens
@@ -145,7 +145,7 @@ for sentence, encoded_sentence in zip(test_corpus, encoded_sentences):
 
 # Length of the longest sentence
 
-max([len(sentence) for sentence in encoded_sentences])
+print(max([len(sentence) for sentence in encoded_sentences]))
 
 
 # In[17]:
@@ -160,7 +160,7 @@ MAX_SEQUENCE_LENGTH = 9
 # Padding sequences that are shorter than the longest sequence
 
 X = pad_sequences(encoded_sentences, maxlen=MAX_SEQUENCE_LENGTH)
-X
+print(X)
 
 
 # ## Embedding Layer
@@ -170,7 +170,7 @@ X
 
 # Training data with more than 1 sentences
 
-X.shape
+print(X.shape)
 
 
 # In[20]:
@@ -184,13 +184,13 @@ X_embedded = embedding(X)
 # In[21]:
 
 
-X_embedded.shape
+print(X_embedded.shape)
 
 
 # In[22]:
 
 
-X_embedded
+print(X_embedded)
 
 
 # In[23]:
@@ -203,13 +203,13 @@ with tsensor.explain(fontname='Hack', dimfontname='Hack'):
 # In[24]:
 
 
-X.shape
+print(X.shape)
 
 
 # In[25]:
 
 
-x_em.shape
+print(x_em.shape)
 
 
 # ## Averaging across tokens
@@ -226,7 +226,7 @@ with tsensor.explain(fontname='Hack', dimfontname='Hack'):
 # In[27]:
 
 
-z.shape
+print(z.shape)
 
 
 # In[28]:

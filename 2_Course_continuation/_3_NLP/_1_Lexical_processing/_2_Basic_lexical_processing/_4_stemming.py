@@ -13,18 +13,18 @@ print(tokens)
 stemmer = PorterStemmer()
 porter_stemmed = [stemmer.stem(token) for token in tokens]
 print(porter_stemmed)
-len(porter_stemmed)
+print(len(porter_stemmed))
 
 # snowball stemmer
 stemmer = SnowballStemmer("english")
 snowball_stemmed = [stemmer.stem(token) for token in tokens]
 print(snowball_stemmed)
-len(snowball_stemmed)
+print(len(snowball_stemmed))
 
 df = pd.DataFrame({'token': tokens, 'porter_stemmed': porter_stemmed, 'snowball_stemmed': snowball_stemmed})
 df = df[['token', 'porter_stemmed', 'snowball_stemmed']]
 
-df[(df.token != df.porter_stemmed) | (df.token != df.snowball_stemmed)]
+print(df[(df.token != df.porter_stemmed) | (df.token != df.snowball_stemmed)])
 
 import datetime, pytz; 
 print("Current Time in IST:", datetime.datetime.now(pytz.utc).astimezone(pytz.timezone('Asia/Kolkata')).strftime('%Y-%m-%d %H:%M:%S'))

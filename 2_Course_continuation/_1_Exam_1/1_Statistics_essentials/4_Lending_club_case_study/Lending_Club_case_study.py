@@ -59,7 +59,7 @@ warnings.filterwarnings('ignore')
 
 #Read the data from csv and load in the dataframe
 lend_data=pd.read_csv("https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/2_Course_continuation/_1_Exam_1/1_Statistics_essentials/4_Lending_club_case_study/loan.csv")
-lend_data.head()
+print(lend_data.head())
 
 
 # # Data Overview
@@ -68,14 +68,14 @@ lend_data.head()
 
 
 #Understand the list of variables and its info
-lend_data.info(verbose=True,show_counts=True)
+print(lend_data.info(verbose=True,show_counts=True))
 
 
 # In[4]:
 
 
 #Find the number of rows and columns
-lend_data.shape
+print(lend_data.shape)
 
 
 # # Data Cleaning
@@ -122,7 +122,7 @@ lend_data.dropna(axis=1, how="all", inplace=True)
 
 
 #Check the shape of data frame
-lend_data.shape
+print(lend_data.shape)
 
 
 # Now we have 57 columns for the analysis.
@@ -149,7 +149,7 @@ print("Total number of columns with only one value: ",c)
 
 #Drop the columns in dataframe
 lend_data.drop(['pymnt_plan', "initial_list_status",'collections_12_mths_ex_med','policy_code','application_type', 'acc_now_delinq', 'chargeoff_within_12_mths', 'delinq_amnt', 'tax_liens'], axis = 1, inplace = True)
-lend_data.head()
+print(lend_data.head())
 
 
 # Identify the attributes which has only unique values across the data
@@ -183,7 +183,7 @@ lend_data.drop(["id", "member_id","url","title","emp_title", "zip_code","desc","
 # In[13]:
 
 
-lend_data.info()
+print(lend_data.info())
 
 
 # #### Analyze pub_rec_bankruptcies Variable
@@ -192,7 +192,7 @@ lend_data.info()
 
 
 #Describe pub_rec_bankruptcies
-lend_data['pub_rec_bankruptcies'].describe()
+print(lend_data['pub_rec_bankruptcies'].describe())
 
 
 # In[15]:
@@ -215,7 +215,7 @@ lend_data.drop(["pub_rec_bankruptcies"], axis = 1, inplace = True)
 # In[17]:
 
 
-lend_data.shape
+print(lend_data.shape)
 
 
 # Now we have 22 columns. Lets understand the features of each columns
@@ -223,7 +223,7 @@ lend_data.shape
 # In[18]:
 
 
-lend_data.info()
+print(lend_data.info())
 # lend_Data is the name of the dataframe
 
 
@@ -339,7 +339,7 @@ lend_data["earliest_cr_line_month"]=pd.DatetimeIndex(lend_data['earliest_cr_line
 # In[32]:
 
 
-lend_data.head() 
+print(lend_data.head())
 
 
 # # Filtering Data
@@ -358,7 +358,7 @@ lend_data = lend_data[lend_data.loan_status != "Current"]
 # In[34]:
 
 
-lend_data.shape
+print(lend_data.shape)
 
 
 # In[35]:
@@ -372,7 +372,7 @@ catg= ['grade', 'sub_grade', 'home_ownership', 'verification_status', 'issue_d',
 # In[36]:
 
 
-lend_data[cont]
+print(lend_data[cont])
 
 
 # Lets analyze "annual_inc" attribute
@@ -392,7 +392,7 @@ plt.show()
 
 
 #Print annual income value for below listed quantile
-lend_data.annual_inc.quantile([0.1,0.15,0.2,0.25,0.5, 0.7,0.75,0.8,0.85,0.9, 0.95,0.96, 0.97,0.98, 0.99])
+print(lend_data.annual_inc.quantile([0.1,0.15,0.2,0.25,0.5, 0.7,0.75,0.8,0.85,0.9, 0.95,0.96, 0.97,0.98, 0.99]))
 
 
 # From above data, we can see more outliers are from 0.96 percentile. So we will consider only the data which has annual income of lesser or equal to 95 percentile
@@ -556,7 +556,7 @@ univ_cont_anlys('dti',color_v='b',bin=5)
 
 
 # Univariate Analysis for pub_rec. Print Value counts
-lend_data['pub_rec'].value_counts()
+print(lend_data['pub_rec'].value_counts())
 
 
 # In[51]:
@@ -569,7 +569,7 @@ univ_cont_anlys('pub_rec',color_v='b',bin=25)
 
 
 #Find the % of applicants who has derogatory public records
-round(lend_data[lend_data['pub_rec']!=0].count()[0]/lend_data['pub_rec'].count()*100,2)
+print(round(lend_data[lend_data['pub_rec']!=0].count().iloc[0]/lend_data['pub_rec'].count()*100,2))
 
 
 # ##### pub_rec Variable Insights 
@@ -632,7 +632,7 @@ lend_data_co=lend_data[lend_data.loan_status == 'Charged Off']
 # In[57]:
 
 
-lend_data_co.shape
+print(lend_data_co.shape)
 
 
 # Extract subgrades numbers from the sub_grade variables and plot graph
@@ -672,7 +672,7 @@ plt.show()
 
 
 #Analyze home_ownership variable. find value counts
-lend_data_co["home_ownership"].value_counts()
+print(lend_data_co["home_ownership"].value_counts())
 
 
 # In[62]:
@@ -1142,7 +1142,7 @@ plt.title("Heat Map")
 plt.show()
 
 # Display correlation matrix
-numeric_data.corr()
+print(numeric_data.corr())
 
 
 # ##### Heat Map - Correlation Insights

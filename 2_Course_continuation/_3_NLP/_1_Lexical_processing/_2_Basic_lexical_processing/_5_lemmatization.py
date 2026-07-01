@@ -53,7 +53,7 @@ print(stemmed)
 import pandas as pd
 df = pd.DataFrame(data={'token': tokens, 'stemmed': stemmed, 'lemmatized': lemmatized})
 df = df[['token', 'stemmed', 'lemmatized']]
-df[(df.token != df.stemmed) | (df.token != df.lemmatized)]
+print(df[(df.token != df.stemmed) | (df.token != df.lemmatized)])
 
 
 # Let's compare the speed of both techniques

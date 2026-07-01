@@ -33,7 +33,7 @@ X_test = pd.read_csv("https://raw.githubusercontent.com/aqwertyuiop48/upgrad_pro
 # In[17]:
 
 
-data.head(5)
+print(data.head(5))
 
 
 # ### Extracting feature variables and target variable
@@ -48,7 +48,7 @@ data_x = data.drop('label',axis=1)
 # In[19]:
 
 
-data_x.head(2)
+print(data_x.head(2))
 
 
 # ### Data visualization
@@ -63,7 +63,7 @@ plt.imshow(img,cmap='gray')
 # In[21]:
 
 
-set(data_y)
+print(set(data_y))
 
 
 # In[22]:

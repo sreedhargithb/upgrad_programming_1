@@ -162,8 +162,8 @@ train_messages, test_messages = messages_set[:sliceIndex], messages_set[sliceInd
 # In[136]:
 
 
-len(train_messages)
-len(test_messages)
+print(len(train_messages))
+print(len(test_messages))
 
 
 # ### Preparing to create feature maps for train and test data

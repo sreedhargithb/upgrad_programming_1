@@ -9,13 +9,13 @@ import pandas as pd
 housing = pd.read_csv("https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/2_Course_continuation/_1_Exam_1/2_Machine_learning/1_Linear_regression/3_4_MLR_with_Python/Multiple%20Linear%20Regression%20in%20Python/Housing.csv")
 
 # Check the head of the dataset
-housing.head()
+print(housing.head())
 
-housing.shape
+print(housing.shape)
 
-housing.info()
+print(housing.info())
 
-housing.describe()
+print(housing.describe())
 
 import matplotlib.pyplot as plt
 import seaborn as sns
@@ -55,13 +55,13 @@ housing[varlist] = housing[varlist].apply(binary_map)
 
 # Check the housing dataframe now
 
-housing.head()
+print(housing.head())
 
 # Get the dummy variables for the feature 'furnishingstatus' and store it in a new variable - 'status'
 status = pd.get_dummies(housing['furnishingstatus'])
 
 # Check what the dataset 'status' looks like
-status.head()
+print(status.head())
 
 # Let's drop the first column from status df using 'drop_first = True'
 
@@ -73,13 +73,13 @@ housing = pd.concat([housing, status], axis = 1)
 
 # Now let's see the head of our dataframe.
 
-housing.head()
+print(housing.head())
 
 # Drop 'furnishingstatus' as we have created the dummies for it
 
 housing.drop(['furnishingstatus'], axis = 1, inplace = True)
 
-housing.head()
+print(housing.head())
 
 from sklearn.model_selection import train_test_split
 
@@ -96,9 +96,9 @@ num_vars = ['area', 'bedrooms', 'bathrooms', 'stories', 'parking','price']
 
 df_train[num_vars] = scaler.fit_transform(df_train[num_vars])
 
-df_train.head()
+print(df_train.head())
 
-df_train.describe()
+print(df_train.describe())
 
 # Let's check the correlation coefficients to see which variables are highly correlated
 
@@ -123,7 +123,7 @@ lr = sm.OLS(y_train, X_train_lm).fit()
 
 # Check the parameters obtained
 
-lr.params
+print(lr.params)
 
 # Let's visualise the data with a scatter plot and the fitted regression line
 plt.scatter(X_train_lm.iloc[:, 1], y_train)
@@ -143,7 +143,7 @@ X_train_lm = sm.add_constant(X_train_lm)
 
 lr = sm.OLS(y_train, X_train_lm).fit()
 
-lr.params
+print(lr.params)
 
 # Check the summary
 print(lr.summary())
@@ -158,7 +158,7 @@ X_train_lm = sm.add_constant(X_train_lm)
 
 lr = sm.OLS(y_train, X_train_lm).fit()
 
-lr.params
+print(lr.params)
 
 # Print the summary of the model
 
@@ -166,7 +166,7 @@ print(lr.summary())
 
 # Check all the columns of the dataframe
 
-housing.columns
+print(housing.columns)
 
 #Build a linear model
 
@@ -175,7 +175,7 @@ X_train_lm = sm.add_constant(X_train)
 
 lr_1 = sm.OLS(y_train, X_train_lm.astype(float)).fit()
 
-lr_1.params
+print(lr_1.params)
 
 print(lr_1.summary())
 
@@ -188,7 +188,7 @@ vif['Features'] = X_train.columns
 vif['VIF'] = [variance_inflation_factor(X_train.values.astype("float"), i) for i in range(X_train.shape[1])]
 vif['VIF'] = round(vif['VIF'], 2)
 vif = vif.sort_values(by = "VIF", ascending = False)
-vif
+print(vif)
 
 # Dropping highly correlated variables and insignificant variables
 
@@ -209,7 +209,7 @@ vif['Features'] = X.columns
 vif['VIF'] = [variance_inflation_factor(X.values.astype(float), i) for i in range(X.shape[1])]
 vif['VIF'] = round(vif['VIF'], 2)
 vif = vif.sort_values(by = "VIF", ascending = False)
-vif
+print(vif)
 
 # Dropping highly correlated variables and insignificant variables
 X = X.drop('bedrooms', axis=1)
@@ -229,7 +229,7 @@ vif['Features'] = X.columns
 vif['VIF'] = [variance_inflation_factor(X.values.astype(float), i) for i in range(X.shape[1])]
 vif['VIF'] = round(vif['VIF'], 2)
 vif = vif.sort_values(by = "VIF", ascending = False)
-vif
+print(vif)
 
 X = X.drop('basement', axis=1)
 
@@ -246,7 +246,7 @@ vif['Features'] = X.columns
 vif['VIF'] = [variance_inflation_factor(X.values.astype(float), i) for i in range(X.shape[1])]
 vif['VIF'] = round(vif['VIF'], 2)
 vif = vif.sort_values(by = "VIF", ascending = False)
-vif
+print(vif)
 
 y_train_price = lr_4.predict(X_train_lm)
 
@@ -260,7 +260,7 @@ num_vars = ['area', 'bedrooms', 'bathrooms', 'stories', 'parking','price']
 
 df_test[num_vars] = scaler.transform(df_test[num_vars])
 
-df_test.describe()
+print(df_test.describe())
 
 y_test = df_test.pop('price')
 X_test = df_test

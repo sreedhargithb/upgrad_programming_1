@@ -26,7 +26,7 @@ import sklearn
 
 # training data
 train_docs = pd.read_csv('https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/2_Course_continuation/_1_Exam_1/2_Machine_learning/3_Naive_Bayes/Naive-Bayes-main/Naive%20Bayes%20for%20text%20classification/example_train.csv') 
-train_docs
+print(train_docs)
 
 
 # So as you can see there are 5 documents (sentences) , 3 are of "education" class and 2 are of "cinema" class.
@@ -36,7 +36,7 @@ train_docs
 
 # convert label to a numerical variable
 train_docs['Class'] = train_docs.Class.map({'cinema':0, 'education':1})
-train_docs
+print(train_docs)
 
 
 # Let's now split the dataframe into X and y labels.
@@ -88,7 +88,7 @@ vec = CountVectorizer()
 
 # fit the vectorizer on training data 
 vec.fit(X_train)
-vec.vocabulary_
+print(vec.vocabulary_)
 
 
 # ```Countvectorizer()``` has converted the documents into a set of unique words alphabetically sorted and indexed.
@@ -107,7 +107,7 @@ vec.vocabulary_
 # removing the stop words this time
 vec = CountVectorizer(stop_words='english')
 vec.fit(X_train)
-vec.vocabulary_
+print(vec.vocabulary_)
 
 
 # Notice that the vocabulary has reduced to 12 from 15. Another way of printing the 'vocabulary' is as follows:
@@ -129,7 +129,7 @@ print(len(vec.get_feature_names_out()))
 
 # another way of representing the features
 X_transformed = vec.transform(X_train)
-X_transformed
+print(X_transformed)
 
 
 # You can see X_tranformed is a 5 x 12 **sparse matrix**. It has 5 rows for each of our 5 documents and 12 columns each 
@@ -185,7 +185,7 @@ pd.DataFrame(X_transformed.toarray(),
 
 # test data
 test_docs = pd.read_csv('https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/2_Course_continuation/_1_Exam_1/2_Machine_learning/3_Naive_Bayes/Naive-Bayes-main/Naive%20Bayes%20for%20text%20classification/example_test.csv') 
-test_docs
+print(test_docs)
 
 
 # In[35]:
@@ -193,7 +193,7 @@ test_docs
 
 # convert label to a numerical variable
 test_docs['Class'] = test_docs.Class.map({'cinema':0, 'education':1})
-test_docs
+print(test_docs)
 
 
 # In[36]:
@@ -219,7 +219,7 @@ print(y_test)
 # note that you *never* fit on test data, only on training data
 # and only transform the test data
 X_test_transformed = vec.transform(X_test)
-X_test_transformed
+print(X_test_transformed)
 
 
 # In[38]:
@@ -227,7 +227,7 @@ X_test_transformed
 
 # convert to non-sparse array
 X_test=X_test_transformed.toarray()
-X_test
+print(X_test)
 
 
 # Let us summarise all we have done till now:
@@ -285,7 +285,7 @@ bnb.fit(X_transformed, y_train)
 # predicting probability of test data
 bnb.predict_proba(X_test)
 prob_bnb = bnb.predict_proba(X_test)
-prob_bnb
+print(prob_bnb)
 
 
 # In the next notebook, we will use Multinomial and Bernoulli Naive Bayes to solve an interesting real problem - classifying SMSes as spam or ham. We'll also see how to decide the optimal cutoff probability and evaluate the model.

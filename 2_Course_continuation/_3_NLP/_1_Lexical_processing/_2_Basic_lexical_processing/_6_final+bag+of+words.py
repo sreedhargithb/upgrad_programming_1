@@ -83,7 +83,7 @@ print(vectorizer.get_feature_names_out())
 
 # load data
 spam = pd.read_csv("https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/2_Course_continuation/_3_NLP/_1_Lexical_processing/_2_Basic_lexical_processing/_2_SMSSpamCollection.txt", sep = "\t", names=["label", "message"])
-spam.head()
+print(spam.head())
 
 
 # ##### Let's take a subset of data (first 50 rows only) and create bag of word model on that.

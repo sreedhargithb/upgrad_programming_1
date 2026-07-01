@@ -5,9 +5,9 @@ import pandas as pd
 nlp = spacy.load("en_core_web_sm")
 
 active_passive = pd.read_csv('https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/2_Course_continuation/_3_NLP/_2_Syntactic_processing/_2_Parsing/_1_Dependency_Parsing_(Google_colab)/Dataset/active_passive.csv')
-active_passive.head(2)
+print(active_passive.head(2))
 
-active_passive.shape
+print(active_passive.shape)
 
 active = active_passive['Active']
 passive = active_passive['Passive']
@@ -46,9 +46,9 @@ for sent in passive:
         missed.append(doc)
 print(cnt)
 
-missed[0]
+print(missed[0])
 
-missed[1]
+print(missed[1])
 
 for doc in missed:
     displacy.render(doc, style="dep")

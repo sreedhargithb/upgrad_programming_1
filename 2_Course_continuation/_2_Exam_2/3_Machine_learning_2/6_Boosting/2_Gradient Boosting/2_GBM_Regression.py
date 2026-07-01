@@ -44,7 +44,7 @@ df_train.rename(columns ={'price': 'SalePrice'}, inplace =True)
 
 
 # Now lets see the first five rows of the data
-data.head()
+print(data.head())
 
 
 # **STEP 2:  DATA CLEANING AND PREPROCESSING**
@@ -102,7 +102,7 @@ for f in features:
 # Printing all the correlated features value with respect to price which is target variable
 # Checking Corelation with price 
 data_correlations = pd.DataFrame(correlations, index=['Value']).T
-data_correlations.loc[data_correlations['Value'].abs().sort_values(ascending=False).index]
+print(data_correlations.loc[data_correlations['Value'].abs().sort_values(ascending=False).index])
 
 
 # **STEP 4 : EDA or DATA VISUALIZATION **
@@ -168,7 +168,7 @@ plt.show();
 # In[17]:
 
 
-df_train.dtypes
+print(df_train.dtypes)
 
 
 # In[18]:
@@ -187,13 +187,13 @@ y = df_train.SalePrice.values
 # In[20]:
 
 
-filtered_data.dtypes
+print(filtered_data.dtypes)
 
 
 # In[21]:
 
 
-filtered_data.dtypes
+print(filtered_data.dtypes)
 
 
 # **STEP 5 : SPLITTING DATA INTO TRAINING AND TESTING SET**
@@ -237,14 +237,14 @@ r2score = r2_score(pred,y_test)
 # In[24]:
 
 
-pred
+print(pred)
 
 
 # In[25]:
 
 
 # Calculating R2 Score
-r2score
+print(r2score)
 
 
 # In[26]:

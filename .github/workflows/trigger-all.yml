@@ -62,9 +62,9 @@ jobs:
           pip install opencv-python-headless pillow imageio
           pip install jupyter ipython nbformat
           pip install plotly
-          pip install kagglehub sklearn-crfsuite
+          pip install "kagglehub==0.3.4" kaggle sklearn-crfsuite
           
-          python -c "import nltk; nltk.download('punkt'); nltk.download('stopwords'); nltk.download('wordnet'); nltk.download('averaged_perceptron_tagger')" || true
+          python -c "import nltk; nltk.download('punkt'); nltk.download('punkt_tab'); nltk.download('stopwords'); nltk.download('wordnet'); nltk.download('averaged_perceptron_tagger'); nltk.download('averaged_perceptron_tagger_eng'); nltk.download('omw-1.4')" || true
           python -m spacy download en_core_web_sm || true
 
       - name: Run chunk ${{ matrix.chunk }}

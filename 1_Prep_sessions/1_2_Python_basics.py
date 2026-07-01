@@ -97,13 +97,13 @@ print(value)
 
 
 t = ("disco", 12, 4.5)
-t
+print(t)
 
 
 # In[80]:
 
 
-type(t)
+print(type(t))
 
 
 # <h3> Tuples can be defined is various ways </h3>
@@ -158,14 +158,14 @@ t = ("Mumbai", 84, "Python",)
 
 
 # gives the element at index location 1
-t[1]
+print(t[1])
 
 
 # In[88]:
 
 
 # gives the last element from tuple
-t[-1]
+print(t[-1])
 
 
 # In[ ]:
@@ -183,7 +183,7 @@ t[-1]
 
 t = ("Seattle", 84, "Python", 5, 2, 1)
 
-t[0:3]
+print(t[0:3])
 
 
 # In[90]:
@@ -193,7 +193,7 @@ t[0:3]
 
 t = ("Seattle", 84, "Python", 5, 2, 1)
 
-t[-2:]
+print(t[-2:])
 
 
 # In[91]:
@@ -201,7 +201,7 @@ t[-2:]
 
 # no. of elements in tuple t
 t = ("Seattle", 84, "Python", 5, 2, 1)
-len(t)
+print(len(t))
 
 
 # #### Cancatenating tuples
@@ -216,7 +216,7 @@ tup2 = ("on", "Tuples")
 
 tup3 = tup1 + tup2
 
-tup3
+print(tup3)
 
 
 # #### sum() - min() - max()
@@ -225,21 +225,21 @@ tup3
 
 
 t = (2, 4, 3, 5, 7)
-sum(t)
+print(sum(t))
 
 
 # In[94]:
 
 
 t = (2, 4, 3, 5, 7)
-min(t)
+print(min(t))
 
 
 # In[95]:
 
 
 t = (2, 4, 3, 5, 7)
-max(t)
+print(max(t))
 
 
 # ### Immutability of tuples
@@ -258,7 +258,7 @@ max(t)
 
 
 new_t = t[0:3] + ("Hard Rock",) + t[4:]
-new_t
+print(new_t)
 
 
 # ### Sorting a tuple
@@ -268,7 +268,7 @@ new_t
 
 t = (2,3,6,4,8,5)
 
-sorted(t)
+print(sorted(t))
 
 
 # In[99]:
@@ -276,7 +276,7 @@ sorted(t)
 
 x = sorted(t)
 
-tuple(x)
+print(tuple(x))
 
 
 # In[100]:
@@ -287,7 +287,7 @@ tuple(x)
 t = (1,5,"Disco", ("Python", "Java"))
 
 # Access "Java" from the nested tuple
-t[3][1]
+print(t[3][1])
 
 
 # ### Packing and Unpacking In Tuples
@@ -319,7 +319,7 @@ print(dir(t))
 
 L = ["USA", 23, 6, "New York"]
 
-L
+print(L)
 
 
 # In[104]:
@@ -328,7 +328,7 @@ L
 # Nested List
 L = ["Chemistry", "Biology", [1989, 2004], ("Oreily", "Pearson")]
 
-L
+print(L)
 
 
 # In[105]:
@@ -337,19 +337,19 @@ L
 # Indexing
 L = ["Chemistry", "Biology", [1989, 2004], ("Oreily", "Pearson")]
 
-L[0]
+print(L[0])
 
 
 # In[106]:
 
 
-L[-3]
+print(L[-3])
 
 
 # In[107]:
 
 
-L[-1][-1]
+print(L[-1][-1])
 
 
 # In[108]:
@@ -357,7 +357,7 @@ L[-1][-1]
 
 # Slicing
 
-L[0:3]
+print(L[0:3])
 
 
 # In[109]:
@@ -377,7 +377,7 @@ print (8 not in L1)  # True
 
 L = ["Chemistry", "Biology", [1989, 2004], ("Oreily", "Pearson")]
 new_L = L + [5, 8]
-new_L
+print(new_L)
 
 
 # In[111]:
@@ -389,7 +389,7 @@ L = ["Chemistry", "Biology", [1989, 2004], ("Oreily", "Pearson")]
 
 L[1] = "Physics"
 
-L
+print(L)
 
 
 # In[112]:
@@ -399,7 +399,7 @@ L
 
 L = ["Chemistry", "Biology", [1989, 2004], ("Oreily", "Pearson")]
 L.extend([5, 8])
-L
+print(L)
 
 
 # In[113]:
@@ -409,7 +409,7 @@ L
 
 L = ["Chemistry", "Biology", [1989, 2004], ("Oreily", "Pearson")]
 L.append([5, 8])
-L
+print(L)
 
 
 # In[114]:
@@ -419,7 +419,7 @@ L
 
 L = ["Chemistry", "Biology", [1989, 2004], ("Oreily", "Pearson")]
 del L[0]
-L
+print(L)
 
 
 # In[115]:
@@ -427,7 +427,7 @@ L
 
 del L[0:2]
 
-L
+print(L)
 
 
 # In[116]:
@@ -439,7 +439,7 @@ L = ["Chemistry", "Biology", [1989, 2004], ("Oreily", "Pearson")]
 
 L.pop()
 
-L
+print(L)
 
 
 # In[117]:
@@ -451,7 +451,7 @@ L = ["Chemistry", "Biology", [1989, 2004], ("Oreily", "Pearson")]
 
 L.remove("Chemistry")
 
-L
+print(L)
 
 
 # In[118]:
@@ -461,14 +461,14 @@ L
 
 l = [32, 24, 65, 9]
 l.sort()
-l
+print(l)
 
 
 # In[119]:
 
 
 l.sort(reverse= True)
-l
+print(l)
 
 
 # #### Difference between sort and sorted
@@ -507,13 +507,13 @@ A[0] = "Apple"
 # In[123]:
 
 
-A
+print(A)
 
 
 # In[124]:
 
 
-B
+print(B)
 
 
 # In[125]:
@@ -530,13 +530,13 @@ A[0] = "Apple"
 # In[126]:
 
 
-A
+print(A)
 
 
 # In[127]:
 
 
-B
+print(B)
 
 
 # Now that we know how to store multiple items together let us build another app that could store userid of our customers, which were randomly generated.
@@ -564,13 +564,13 @@ l = [1,3,2,4,5,5]
 
 set_l = set(l)
 
-set_l
+print(set_l)
 
 
 # In[129]:
 
 
-len(set_l)
+print(len(set_l))
 
 
 # In[130]:
@@ -580,7 +580,7 @@ a = {1, 2, 3, 4, 5}
 
 a.add("Australia")
 
-a
+print(a)
 
 
 # In[131]:
@@ -588,7 +588,7 @@ a
 
 a = {1, 2, 3, 4, 5, "Australia"}
 a.remove("Australia")
-a
+print(a)
 
 
 # In[132]:
@@ -660,7 +660,7 @@ d = {"India" : "INR", "USA" : "USD", "France" : "Euros"}
 
 # Access value using keys
 
-d["USA"]
+print(d["USA"])
 
 
 # In[138]:
@@ -670,7 +670,7 @@ d["USA"]
 
 d["USA"] = "$"
 
-d
+print(d)
 
 
 # In[139]:
@@ -680,7 +680,7 @@ d
 
 d["Japan"] = "Yen"
 
-d
+print(d)
 
 
 # In[140]:
@@ -690,7 +690,7 @@ d
 
 del d["France"]
 
-d
+print(d)
 
 
 # In[141]:
@@ -698,7 +698,7 @@ d
 
 # Sorting a dictionary
 
-sorted(d)
+print(sorted(d))
 
 
 # In[142]:
@@ -708,7 +708,7 @@ sorted(d)
 
 d = {"India" : "INR", "USA" : "USD", "France" : "Euros"}
 
-d.values()
+print(d.values())
 
 
 # In[143]:
@@ -716,7 +716,7 @@ d.values()
 
 # Keys() Method
 
-d.keys()
+print(d.keys())
 
 
 # In[144]:
@@ -725,7 +725,7 @@ d.keys()
 # Update() Method
 
 d.update({'USA':'$'})
-d
+print(d)
 
 
 # <a id='OOP'>OOP</a>

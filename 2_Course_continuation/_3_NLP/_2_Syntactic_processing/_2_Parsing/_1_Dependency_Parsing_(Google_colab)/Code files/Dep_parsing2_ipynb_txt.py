@@ -59,13 +59,13 @@ matcher(doc)
 # In[7]:
 
 
-doc[0:1]
+print(doc[0:1])
 
 
 # In[8]:
 
 
-doc[4:5]
+print(doc[4:5])
 
 
 # ### Create a rule for `passive voice`
@@ -89,7 +89,7 @@ matcher(doc)
 # In[11]:
 
 
-active[0]
+print(active[0])
 
 
 # In[12]:

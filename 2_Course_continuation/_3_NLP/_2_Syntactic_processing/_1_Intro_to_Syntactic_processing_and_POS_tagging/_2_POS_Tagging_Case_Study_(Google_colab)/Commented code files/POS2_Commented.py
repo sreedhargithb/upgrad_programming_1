@@ -32,7 +32,7 @@ con.close()
 # In[ ]:
 
 
-len(samsung_reviews.split("\n"))
+print(len(samsung_reviews.split("\n")))
 
 
 # ### Dataset is a text file where each review is in a new line
@@ -40,7 +40,7 @@ len(samsung_reviews.split("\n"))
 # In[ ]:
 
 
-samsung_reviews.split("\n")[0:4]
+print(samsung_reviews.split("\n")[0:4])
 
 
 # ### Will our hypothesis hold on real world data? `Product features---POS_NOUN`

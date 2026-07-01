@@ -16,69 +16,69 @@ from scipy.cluster.hierarchy import cut_tree
 
 # read the dataset
 retail_df = pd.read_csv("https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/2_Course_continuation/_2_Exam_2/3_Machine_learning_2/7_Unsupervised_learning__clustering/1_K-means/_1_Lab/Online_Retail.csv", sep=",", encoding="ISO-8859-1", header=0)
-retail_df.head()
+print(retail_df.head())
 
 # basics of the df
-retail_df.info()
+print(retail_df.info())
 
 # missing values
-round(100*(retail_df.isnull().sum())/len(retail_df), 2)
+print(round(100*(retail_df.isnull().sum())/len(retail_df), 2))
 
 # drop all rows having missing values
 retail_df = retail_df.dropna()
-retail_df.shape
+print(retail_df.shape)
 
-retail_df.head()
+print(retail_df.head())
 
 # new column: amount 
 retail_df['amount'] = retail_df['Quantity']*retail_df['UnitPrice']
-retail_df.head()
+print(retail_df.head())
 
 # monetary
 grouped_df = retail_df.groupby('CustomerID')['amount'].sum()
 grouped_df = grouped_df.reset_index()
-grouped_df.head()
+print(grouped_df.head())
 
 # frequency
 frequency = retail_df.groupby('CustomerID')['InvoiceNo'].count()
 frequency = frequency.reset_index()
 frequency.columns = ['CustomerID', 'frequency']
-frequency.head()
+print(frequency.head())
 
 # merge the two dfs
 grouped_df = pd.merge(grouped_df, frequency, on='CustomerID', how='inner')
-grouped_df.head()
+print(grouped_df.head())
 
-retail_df.head()
+print(retail_df.head())
 
 # recency
 # convert to datetime
 retail_df['InvoiceDate'] = pd.to_datetime(retail_df['InvoiceDate'], 
                                           format='%d-%m-%Y %H:%M')
 
-retail_df.head()
+print(retail_df.head())
 
 # compute the max date
 max_date = max(retail_df['InvoiceDate'])
-max_date
+print(max_date)
 
 # compute the diff
 retail_df['diff'] = max_date - retail_df['InvoiceDate']
-retail_df.head()
+print(retail_df.head())
 
 # recency
 last_purchase = retail_df.groupby('CustomerID')['diff'].min()
 last_purchase = last_purchase.reset_index()
-last_purchase.head()
+print(last_purchase.head())
 
 # merge
 grouped_df = pd.merge(grouped_df, last_purchase, on='CustomerID', how='inner')
 grouped_df.columns = ['CustomerID', 'amount', 'frequency', 'recency']
-grouped_df.head()
+print(grouped_df.head())
 
 # number of days only
 grouped_df['recency'] = grouped_df['recency'].dt.days
-grouped_df.head()
+print(grouped_df.head())
 
 # 1. outlier treatment
 plt.boxplot(grouped_df['recency'])
@@ -115,17 +115,17 @@ scaler = StandardScaler()
 
 # fit_transform
 rfm_df_scaled = scaler.fit_transform(rfm_df)
-rfm_df_scaled.shape
+print(rfm_df_scaled.shape)
 
 rfm_df_scaled = pd.DataFrame(rfm_df_scaled)
 rfm_df_scaled.columns = ['amount', 'frequency', 'recency']
-rfm_df_scaled.head()
+print(rfm_df_scaled.head())
 
 # k-means with some arbitrary k
 kmeans = KMeans(n_clusters=4, max_iter=50)
 kmeans.fit(rfm_df_scaled)
 
-kmeans.labels_
+print(kmeans.labels_)
 
 # help(KMeans)
 
@@ -163,18 +163,18 @@ for num_clusters in range_n_clusters:
 kmeans = KMeans(n_clusters=3, max_iter=50)
 kmeans.fit(rfm_df_scaled)
 
-kmeans.labels_
+print(kmeans.labels_)
 
 # assign the label
 grouped_df['cluster_id'] = kmeans.labels_
-grouped_df.head()
+print(grouped_df.head())
 
 # plot
 sns.boxplot(x='cluster_id', y='amount', data=grouped_df)
 
-rfm_df_scaled.head()
+print(rfm_df_scaled.head())
 
-grouped_df.head()
+print(grouped_df.head())
 
 # single linkage
 mergings = linkage(rfm_df_scaled, method="single", metric='euclidean')
@@ -188,11 +188,11 @@ plt.show()
 
 # 3 clusters
 cluster_labels = cut_tree(mergings, n_clusters=3).reshape(-1, )
-cluster_labels
+print(cluster_labels)
 
 # assign cluster labels
 grouped_df['cluster_labels'] = cluster_labels
-grouped_df.head()
+print(grouped_df.head())
 
 # plots
 sns.boxplot(x='cluster_labels', y='recency', data=grouped_df)

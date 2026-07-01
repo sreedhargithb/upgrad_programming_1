@@ -33,10 +33,10 @@ get_ipython().system('pip install --upgrade --force-reinstall numpy scikit-learn
 get_ipython().system('pip install --upgrade imbalanced-learn shap hdbscan jax opencv-python')
 
 attrition = pd.read_csv('https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/2_Course_continuation/_2_Exam_2/3_Machine_learning_2/6_Boosting/2_Gradient%20Boosting/WA_Fn-UseC_-HR-Employee-Attrition.csv')
-attrition.head()
+print(attrition.head())
 
 # Looking for NaN
-attrition.isnull().any()
+print(attrition.isnull().any())
 
 # attrition.Age.fillna('')
 
@@ -44,12 +44,12 @@ attrition.isnull().any()
 
 # attrition.shape
 
-attrition.dtypes
+print(attrition.dtypes)
 
 # Empty list to store columns with categorical data
 categorical = []
 for col, value in attrition.items():
-    if value.dtype == 'object':
+    if value.dtype == 'object' or pd.api.types.is_string_dtype(value):
         categorical.append(col)
 
 # Store the numerical columns in a list numerical
@@ -58,18 +58,18 @@ numerical = attrition.columns.difference(categorical)
 print("Categorical columns:", categorical)
 print("Numerical columns:", numerical)
 
-numerical
+print(numerical)
 
-categorical
+print(categorical)
 
 # Store the categorical data in a dataframe called attrition_cat
 attrition_cat = attrition[categorical]
 attrition_cat = attrition_cat.drop(['Attrition'], axis=1) # Dropping the target column
 
-attrition_cat
+print(attrition_cat)
 
 attrition_cat = pd.get_dummies(attrition_cat)
-attrition_cat.head(3)
+print(attrition_cat.head(3))
 
 # Store the numerical features to a dataframe attrition_num
 attrition_num = attrition[numerical]
@@ -77,15 +77,15 @@ attrition_num = attrition[numerical]
 # Concat the two dataframes together columnwise
 attrition_final = pd.concat([attrition_num, attrition_cat], axis=1)
 
-attrition_final.shape
+print(attrition_final.shape)
 
-attrition_final.head()
+print(attrition_final.head())
 
 # Define a dictionary for the target mapping
 target_map = {'Yes':1, 'No':0}
 # Use the pandas apply method to numerically encode our attrition target variable
 target = attrition["Attrition"].apply(lambda x: target_map[x])
-target.head(3)
+print(target.head(3))
 
 # Split data into train and test sets as well as for validation and testing
 train, test, target_train, target_test = train_test_split(attrition_final, target, train_size= 0.75,random_state=0);
@@ -99,7 +99,7 @@ xgb_cfl.fit(train, target_train)  # default
 xgb_predictions = xgb_cfl.predict(test)
 
 xgb_predictions_prob = xgb_cfl.predict_proba(test)
-xgb_predictions_prob
+print(xgb_predictions_prob)
 
 accuracy_score(target_test, xgb_predictions)
 
@@ -133,7 +133,7 @@ print(random_search.best_params_)
 xgb_predictions_hpt = random_search.predict(test)
 accuracy_score(target_test, xgb_predictions_hpt)
 
-xgb_cfl.feature_importances_
+print(xgb_cfl.feature_importances_)
 
 # Scatter plot 
 trace = go.Scatter(

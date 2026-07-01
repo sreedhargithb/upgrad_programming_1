@@ -40,7 +40,7 @@ from nltk.corpus import wordnet
 # Synsets
 
 tractor = wordnet.synsets('tractor')
-tractor
+print(tractor)
 
 
 # In[6]:

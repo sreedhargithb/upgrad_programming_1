@@ -16,7 +16,7 @@ from sklearn.metrics import accuracy_score
 
 
 df= pd.read_csv('https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/2_Course_continuation/_2_Exam_2/4_Deep_learning/_1_2_Intro_to_neural_networks/_3_Neural_network_implementation_using_keras/house_price_full.csv')
-df.head()
+print(df.head())
 
 
 # In[3]:
@@ -38,13 +38,13 @@ Y = np.log(Y)
 
 
 df_scaled = pd.DataFrame(X)
-df_scaled
+print(df_scaled)
 
 
 # In[5]:
 
 
-Y
+print(Y)
 
 
 # ## Part 2: Create Model Using `keras`
@@ -150,7 +150,7 @@ model.fit(X,Y.values,epochs=10,batch_size=32)
 # In[10]:
 
 
-model.predict(X)[:,0]
+print(model.predict(X)[:,0])
 
 
 # In[11]:

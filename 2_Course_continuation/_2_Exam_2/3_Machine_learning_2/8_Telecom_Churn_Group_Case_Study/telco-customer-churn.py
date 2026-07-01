@@ -36,7 +36,7 @@ import kagglehub
 path = kagglehub.dataset_download("blastchar/telco-customer-churn")
 print("Path to dataset files:", path)
 df=pd.read_csv('/kaggle/input/telco-customer-churn/WA_Fn-UseC_-Telco-Customer-Churn.csv')
-df.head()
+print(df.head())
 
 
 # # **Understanding the data**
@@ -44,19 +44,19 @@ df.head()
 # In[8]:
 
 
-df.shape
+print(df.shape)
 
 
 # In[9]:
 
 
-df.isnull().sum()
+print(df.isnull().sum())
 
 
 # In[10]:
 
 
-df.info()
+print(df.info())
 
 
 # # **Data Manipulation**
@@ -70,7 +70,7 @@ df.drop('customerID',axis=1,inplace=True)
 # In[12]:
 
 
-df.head()
+print(df.head())
 
 
 # In[13]:
@@ -82,13 +82,13 @@ df['TotalCharges'] = pd.to_numeric(df['TotalCharges'], errors='coerce')
 # In[14]:
 
 
-df['TotalCharges'].info()
+print(df['TotalCharges'].info())
 
 
 # In[15]:
 
 
-df['TotalCharges'].isnull().sum()
+print(df['TotalCharges'].isnull().sum())
 
 
 # In[16]:
@@ -100,7 +100,7 @@ df.dropna(axis=0,inplace=True)
 # In[17]:
 
 
-df.isnull().sum()
+print(df.isnull().sum())
 
 
 # In[18]:
@@ -114,7 +114,7 @@ for i in df.columns:
 
 
 df['PaymentMethod']=df['PaymentMethod'].replace({'Bank transfer (automatic)':'Automatic','Credit card (automatic)':'Automatic'})
-df['PaymentMethod'].value_counts()
+print(df['PaymentMethod'].value_counts())
 
 
 # # **EDA**
@@ -286,13 +286,13 @@ for col in df.select_dtypes(include=['object']).columns:
     df[col] = le.fit_transform(df[col])
     label_encoders[col] = le  
 
-df
+print(df)
 
 
 # In[33]:
 
 
-df.info()
+print(df.info())
 
 
 # In[34]:
@@ -319,7 +319,7 @@ y=df['Churn']
 # In[36]:
 
 
-y.value_counts()
+print(y.value_counts())
 
 
 # In[37]:
@@ -351,25 +351,25 @@ x_test[columns_to_scale] = scaler.transform(x_test[columns_to_scale])
 # In[40]:
 
 
-y_test.shape
+print(y_test.shape)
 
 
 # In[41]:
 
 
-x_test.shape
+print(x_test.shape)
 
 
 # In[42]:
 
 
-x_train.shape
+print(x_train.shape)
 
 
 # In[43]:
 
 
-y_train.shape
+print(y_train.shape)
 
 
 # # **Model**

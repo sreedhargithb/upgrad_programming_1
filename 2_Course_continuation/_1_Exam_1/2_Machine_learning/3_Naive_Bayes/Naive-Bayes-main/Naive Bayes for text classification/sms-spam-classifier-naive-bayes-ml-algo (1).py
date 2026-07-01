@@ -23,7 +23,7 @@ import pandas as pd # data processing, CSV file I/O (e.g. pd.read_csv)
 import nltk
 
 df_sms = pd.read_csv('https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/2_Course_continuation/_1_Exam_1/2_Machine_learning/3_Naive_Bayes/Naive-Bayes-main/Naive%20Bayes%20for%20text%20classification/spam.csv',encoding='latin-1')
-df_sms.head()
+print(df_sms.head())
 
 
 # **Dropping the unwanted columns Unnamed:2, Unnamed: 3 and Unnamed:4**
@@ -38,7 +38,7 @@ df_sms = df_sms.rename(columns={"v1":"label", "v2":"sms"})
 # In[4]:
 
 
-df_sms.head()
+print(df_sms.head())
 
 
 # In[5]:
@@ -51,27 +51,27 @@ print (len(df_sms))
 # In[6]:
 
 
-df_sms.tail()
+print(df_sms.tail())
 
 
 # In[7]:
 
 
 #Number of observations in each label spam and ham
-df_sms.label.value_counts()
+print(df_sms.label.value_counts())
 
 
 # In[8]:
 
 
-df_sms.describe()
+print(df_sms.describe())
 
 
 # In[9]:
 
 
 df_sms['length'] = df_sms['sms'].apply(len)
-df_sms.head()
+print(df_sms.head())
 
 
 # In[10]:
@@ -95,7 +95,7 @@ df_sms.hist(column='length', by='label', bins=50,figsize=(10,4))
 
 df_sms['label'] = df_sms['label'].map({'ham':0, 'spam':1}).astype(int)
 print(df_sms.shape)
-df_sms.head()
+print(df_sms.head())
 
 
 # **Bag of Words Approach**
@@ -156,7 +156,7 @@ import string
 for i in lower_case_documents:
     sans_punctuation_documents.append(i.translate(str.maketrans("","", string.punctuation)))
 
-sans_punctuation_documents
+print(sans_punctuation_documents)
 
 
 # Step 3: Tokenization
@@ -165,7 +165,7 @@ sans_punctuation_documents
 
 
 preprocessed_documents = [[w for w in d.split()] for d in sans_punctuation_documents]
-preprocessed_documents
+print(preprocessed_documents)
 
 
 # Step 4: Count frequencies
@@ -240,7 +240,7 @@ print(feature_names)
 
 
 doc_array = count_vector.transform(documents).toarray()
-doc_array
+print(doc_array)
 
 
 # In[20]:

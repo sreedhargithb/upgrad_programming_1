@@ -27,7 +27,7 @@ df_train=data.copy()
 df_train.rename(columns ={'price': 'SalePrice'}, inplace =True)
 
 # Now lets see the first five rows of the data
-data.head()
+print(data.head())
 
 print(len(data))
 # Check the number of features in the data set
@@ -58,7 +58,7 @@ for f in features:
 # Printing all the correlated features value with respect to price which is target variable
 # Checking Corelation with price 
 data_correlations = pd.DataFrame(correlations, index=['Value']).T
-data_correlations.loc[data_correlations['Value'].abs().sort_values(ascending=False).index]
+print(data_correlations.loc[data_correlations['Value'].abs().sort_values(ascending=False).index])
 
 var = 'sqft_living15'
 data = pd.concat([data['price'], data[var]], axis=1)
@@ -93,16 +93,16 @@ cols = ['SalePrice', 'sqft_living', 'grade', 'sqft_above', 'view', 'bathrooms','
 sns.pairplot(df_train[cols], height = 3.5)
 plt.show();
 
-df_train.dtypes
+print(df_train.dtypes)
 
 filtered_data = df_train[['sqft_living','grade', 'sqft_above', 'sqft_living15','bathrooms','view','sqft_basement','waterfront','yr_built','lat','bedrooms','long']]
 
 X = filtered_data.values
 y = df_train.SalePrice.values
 
-filtered_data.dtypes
+print(filtered_data.dtypes)
 
-filtered_data.dtypes
+print(filtered_data.dtypes)
 
 X_train, X_test, y_train, y_test = train_test_split(X, y ,test_size=0.2)
 
@@ -111,7 +111,7 @@ predict = adaboost.predict(X_test)
 r2score = r2_score(predict,y_test)
 
 # Calculating R2 Score
-r2score
+print(r2score)
 
 # Calculating Mean Sqaured Error & Root Mean Squared Error
 mse = mean_squared_error(y_test, predict)

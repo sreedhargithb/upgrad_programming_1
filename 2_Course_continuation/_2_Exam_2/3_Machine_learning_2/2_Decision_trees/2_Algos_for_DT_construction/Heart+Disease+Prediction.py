@@ -20,13 +20,13 @@ df = pd.read_csv('https://raw.githubusercontent.com/aqwertyuiop48/upgrad_program
 # In[59]:
 
 
-df.columns
+print(df.columns)
 
 
 # In[60]:
 
 
-df.head()
+print(df.head())
 
 
 # In[61]:

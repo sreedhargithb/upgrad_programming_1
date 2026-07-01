@@ -46,7 +46,7 @@ y_test = tf.keras.utils.to_categorical(y_test, num_classes)
 print(y_train.shape)
 
 # originally, the pixels are stored as ints
-x_train.dtype
+print(x_train.dtype)
 
 # convert int to float
 x_train = x_train.astype('float32')

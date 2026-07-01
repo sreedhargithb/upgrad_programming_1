@@ -38,7 +38,7 @@ housing = pd.read_csv('https://raw.githubusercontent.com/aqwertyuiop48/upgrad_pr
 
 
 # Looking at the first five rows
-housing.head()
+print(housing.head())
 
 
 # ### Data Preparation
@@ -63,7 +63,7 @@ housing[varlist] = housing[varlist].apply(binary_map)
 
 # Check the housing dataframe now
 
-housing.head()
+print(housing.head())
 
 
 # ### Dummy Variables
@@ -78,7 +78,7 @@ housing.head()
 status = pd.get_dummies(housing['furnishingstatus'])
 
 # Check what the dataset 'status' looks like
-status.head()
+print(status.head())
 
 
 # Now, you don't need three columns. You can drop the `furnished` column, as the type of furnishing can be identified with just the last two columns where — 
@@ -96,7 +96,7 @@ status = pd.get_dummies(housing['furnishingstatus'], drop_first = True)
 housing = pd.concat([housing, status], axis = 1)
 
 # Now let's see the head of our dataframe.
-housing.head()
+print(housing.head())
 
 
 # In[9]:
@@ -105,7 +105,7 @@ housing.head()
 # Drop 'furnishingstatus' as we have created the dummies for it
 housing.drop(['furnishingstatus'], axis = 1, inplace = True)
 
-housing.head()
+print(housing.head())
 
 
 # ## Splitting the Data into Training and Testing Sets
@@ -139,7 +139,7 @@ num_vars = ['area', 'bedrooms', 'bathrooms', 'stories', 'parking','price']
 
 df_train[num_vars] = scaler.fit_transform(df_train[num_vars])
 
-df_train.head()
+print(df_train.head())
 
 
 # ### Dividing into X and Y sets for the model building
@@ -184,20 +184,20 @@ print("Feature Ranking: ", rfe.ranking_)
 # In[16]:
 
 
-list(zip(X_train.columns,rfe.support_,rfe.ranking_))
+print(list(zip(X_train.columns,rfe.support_,rfe.ranking_)))
 
 
 # In[17]:
 
 
 col = X_train.columns[rfe.support_]
-col
+print(col)
 
 
 # In[18]:
 
 
-X_train.columns[~rfe.support_]
+print(X_train.columns[~rfe.support_])
 
 
 # ### Building model using statsmodel, for the detailed statistics
@@ -264,7 +264,7 @@ print(lm.summary())
 # In[27]:
 
 
-X_train_new.columns
+print(X_train_new.columns)
 
 
 # In[28]:
@@ -285,7 +285,7 @@ vif['Features'] = X.columns
 vif['VIF'] = [variance_inflation_factor(X.values, i) for i in range(X.shape[1])]
 vif['VIF'] = round(vif['VIF'], 2)
 vif = vif.sort_values(by = "VIF", ascending = False)
-vif
+print(vif)
 
 
 # ## Residual Analysis of the train data

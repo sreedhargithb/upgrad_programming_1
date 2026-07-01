@@ -12,13 +12,13 @@ import matplotlib.pyplot as plt
 import seaborn as sns
 
 churn_data = pd.read_csv("https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/2_Course_continuation/_1_Exam_1/2_Machine_learning/2_Logistic_Regression/2_Multivariate_logistic_regression/Telecom_Churn/churn_data.csv")
-churn_data.head()
+print(churn_data.head())
 
 customer_data = pd.read_csv("https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/2_Course_continuation/_1_Exam_1/2_Machine_learning/2_Logistic_Regression/2_Multivariate_logistic_regression/Telecom_Churn/customer_data.csv")
-customer_data.head()
+print(customer_data.head())
 
 internet_data = pd.read_csv("https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/2_Course_continuation/_1_Exam_1/2_Machine_learning/2_Logistic_Regression/2_Multivariate_logistic_regression/Telecom_Churn/internet_data.csv")
-internet_data.head()
+print(internet_data.head())
 
 # Merging on 'customerID'
 df_1 = pd.merge(churn_data, customer_data, how='inner', on='customerID')
@@ -26,18 +26,18 @@ df_1 = pd.merge(churn_data, customer_data, how='inner', on='customerID')
 # Final dataframe with all predictor variables
 telecom = pd.merge(df_1, internet_data, how='inner', on='customerID')
 
-telecom.head()
+print(telecom.head())
 
-telecom.columns
+print(telecom.columns)
 
 # Let's check the dimensions of the dataframe
-telecom.shape
+print(telecom.shape)
 
 # let's look at the statistical aspects of the dataframe
-telecom.describe()
+print(telecom.describe())
 
 # Let's see the type of each column
-telecom.info()
+print(telecom.info())
 
 telecom['TotalCharges'] = telecom['TotalCharges'].replace(' ', np.nan)
 telecom['TotalCharges'] = pd.to_numeric(telecom['TotalCharges'])
@@ -49,7 +49,7 @@ value = telecom['MonthlyCharges'] * telecom['tenure']
 
 telecom['TotalCharges'] = value.where(telecom['TotalCharges'] == np.nan, other=telecom['TotalCharges'])
 
-telecom['TotalCharges']
+print(telecom['TotalCharges'])
 
 # Distribution of Total Charges Field
 
@@ -143,7 +143,7 @@ def binary_map(x):
 # Applying the function to the housing list
 telecom[varlist] = telecom[varlist].apply(binary_map)
 
-telecom.head()
+print(telecom.head())
 
 # Creating a dummy variable for some of the categorical variables and dropping the first one.
 dummy1 = pd.get_dummies(telecom[['Contract', 'PaymentMethod', 'gender', 'InternetService', 'MultipleLines', 'OnlineSecurity', 'OnlineBackup', 'DeviceProtection', 'TechSupport', 'StreamingTV', 'StreamingMovies']], drop_first=True)
@@ -155,18 +155,18 @@ telecom = pd.concat([telecom, dummy1], axis=1)
 telecom = telecom.drop(['Contract','PaymentMethod','gender','MultipleLines','InternetService', 'OnlineSecurity', 'OnlineBackup', 'DeviceProtection',
        'TechSupport', 'StreamingTV', 'StreamingMovies'], axis=1)
 
-telecom.head()
+print(telecom.head())
 
-telecom.info()
+print(telecom.info())
 
 # Adding up the missing values (column-wise)
-telecom.isnull().sum()
+print(telecom.isnull().sum())
 
 # Removing NaN TotalCharges rows
 telecom = telecom[~np.isnan(telecom['TotalCharges'])]
 
 # Checking percentage of missing values after removing the missing values
-round(100 * (telecom.isnull().sum() / len(telecom.index)), 2)
+print(round(100 * (telecom.isnull().sum() / len(telecom.index)), 2))
 
 from sklearn.model_selection import train_test_split
 
@@ -183,7 +183,7 @@ scaler = StandardScaler()
 
 X_train[['tenure','MonthlyCharges','TotalCharges']] = scaler.fit_transform(X_train[['tenure','MonthlyCharges','TotalCharges']])
 
-X_train.head()
+print(X_train.head())
 
 # # Check the corr values of final list of variables
 # cor = telecom.corr()
@@ -230,7 +230,7 @@ plt.show()
 
 from statsmodels.tools import add_constant as add_constant
 X_train_constant = add_constant(X_train)
-X_train_constant.head()
+print(X_train_constant.head())
 
 cols = X_train_constant.columns
 model = smd.Logit(y_train, X_train_constant[cols].astype(float))
@@ -322,10 +322,10 @@ pd.DataFrame(zip(lr_fpr, lr_tpr), columns=('FPR', 'TPR'))
 
 y_train_pred_final = pd.DataFrame({'Churn':y_train.values, 'Churn_Prob':lr_probs})
 y_train_pred_final['CustID'] = y_train.index
-y_train_pred_final.head(20)
+print(y_train_pred_final.head(20))
 
 y_train_pred_final['predicted'] = y_train_pred_final.Churn_Prob.map(lambda x: 1 if x > 0.5 else 0)
-y_train_pred_final.head()
+print(y_train_pred_final.head())
 
 from sklearn import metrics
 # Create Confusion matrix 
@@ -339,9 +339,9 @@ print(metrics.accuracy_score(y_train_pred_final.Churn, y_train_pred_final.predic
 numbers = [float(x)/10 for x in range(10)]
 for i in numbers:
     y_train_pred_final[i]= y_train_pred_final.Churn_Prob.map(lambda x: 1 if x > i else 0)
-y_train_pred_final.head()
+print(y_train_pred_final.head())
 
-numbers
+print(numbers)
 
 # Now let's calculate accuracy sensitivity and specificity for various probability cutoffs.
 cutoff_df = pd.DataFrame( columns = ['prob','accuracy','sensi','speci'])
@@ -369,13 +369,13 @@ plt.ylabel('Accuracy/Sensitivity/Sepecificity')
 plt.show()
 
 y_train_pred_final['final_predicted'] = y_train_pred_final.Churn_Prob.map(lambda x: 1 if x > 0.3 else 0)
-y_train_pred_final.head()
+print(y_train_pred_final.head())
 
 # Let's check the overall accuracy.
 metrics.accuracy_score(y_train_pred_final.Churn, y_train_pred_final.final_predicted)
 
 confusion2 = metrics.confusion_matrix(y_train_pred_final.Churn, y_train_pred_final.final_predicted )
-confusion2
+print(confusion2)
 
 TP = confusion2[1,1] # true positive 
 TN = confusion2[0,0] # true negatives
@@ -398,7 +398,7 @@ print (TP / float(TP+FP))
 print (TN / float(TN+ FN))
 
 confusion = metrics.confusion_matrix(y_train_pred_final.Churn, y_train_pred_final.predicted )
-confusion
+print(confusion)
 
 confusion[1,1]/(confusion[0,1]+confusion[1,1])
 
@@ -416,7 +416,7 @@ pd.DataFrame(zip(y_train_pred_final.Churn, y_train_pred_final.predicted))
 
 p, r, thresholds = precision_recall_curve(y_train_pred_final.Churn, y_train_pred_final.Churn_Prob)
 
-pd.DataFrame(zip(p, r, thresholds), columns=('Precision', 'Recall', 'thesholds')).head(10)
+print(pd.DataFrame(zip(p, r, thresholds), columns=('Precision', 'Recall', 'thesholds')).head(10))
 
 plt.plot(r[:-1], p[:-1], "g-")
 plt.xlabel('Recall')
@@ -430,25 +430,25 @@ plt.ylabel('Precision (Green) / Recall (Red)')
 plt.show()
 
 X_test = X_test[cols_model]
-X_test
+print(X_test)
 
 scaler = StandardScaler()
 
 X_test[['tenure','MonthlyCharges']] = scaler.fit_transform(X_test[['tenure','MonthlyCharges']])
 
-X_test
+print(X_test)
 
-list(zip(X_train1.columns, X_test.columns))
+print(list(zip(X_train1.columns, X_test.columns)))
 
 y_test_pred = logreg.predict(X_test)
 
-list(zip(y_test_pred[:10], y_test[:10]))
+print(list(zip(y_test_pred[:10], y_test[:10])))
 
 # Converting y_pred to a dataframe which is an array
 y_pred_1 = pd.DataFrame(y_test_pred)
 
 # Let's see the head
-y_pred_1.head()
+print(y_pred_1.head())
 
 # Converting y_test to dataframe
 y_test_df = pd.DataFrame(y_test)
@@ -457,8 +457,8 @@ y_test_df = pd.DataFrame(y_test)
 y_test_df['CustID'] = y_test_df.index
 
 # Removing index for both dataframes to append them side by side 
-y_pred_1.reset_index(drop=True, inplace=True)
-y_test_df.reset_index(drop=True, inplace=True)
+print(y_pred_1.reset_index(drop=True, inplace=True))
+print(y_test_df.reset_index(drop=True, inplace=True))
 
 # Appending y_test_df and y_pred_1
 y_pred_final = pd.concat([y_test_df, y_pred_1],axis=1)
@@ -469,20 +469,20 @@ lr_probs_test = lr_probs_test[:, 1]
 y_pred_final['Churn_Prob'] = lr_probs_test
 # y_pred_final.rename(columns={ 0 : 'Churn_Prob'})
 
-lr_probs_test
+print(lr_probs_test)
 
 # Let's see the head of y_pred_final
-y_pred_final
+print(y_pred_final)
 
 y_pred_final['final_predicted'] = y_pred_final.Churn_Prob.map(lambda x: 1 if x > 0.42 else 0)
 
-y_pred_final.head()
+print(y_pred_final.head())
 
 # Let's check the overall accuracy.
 metrics.accuracy_score(y_pred_final.Churn, y_pred_final.final_predicted)
 
 confusion2 = metrics.confusion_matrix(y_pred_final.Churn, y_pred_final.final_predicted )
-confusion2
+print(confusion2)
 
 TP = confusion2[1,1] # true positive 
 TN = confusion2[0,0] # true negatives

@@ -31,7 +31,7 @@ all_words = Counter(words(open('_3_seed_document.txt').read()))
 
 
 # check frequency of a random word, say, 'chair'
-all_words['chair']
+print(all_words['chair'])
 
 
 # In[20]:

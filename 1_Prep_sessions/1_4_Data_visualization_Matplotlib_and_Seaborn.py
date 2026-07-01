@@ -463,7 +463,7 @@ data = pd.read_csv("https://raw.githubusercontent.com/aqwertyuiop48/upgrad_progr
 # As a preparatory step, let's drop Unnamed column.
 #data = data.drop("Unnamed: 0", axis =1 )
 
-data.head()
+print(data.head())
 
 print('''### Data Dictionary:
 
@@ -525,7 +525,7 @@ The observations in the variable cut are categories, not values like price or ca
 
 # Before plotting extract the required data by performing necessary data manipulation
 groupdata = data.groupby("cut").count()
-groupdata
+print(groupdata)
 
 # Create lists which hold the necessary data
 x_vals = []
@@ -679,7 +679,7 @@ import seaborn as sns
 # loading data
 df=pd.read_csv("https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/1_Prep_sessions/data_visualization_material/Footwear_v2.csv")
 
-df.head()
+print(df.head())
 
 # we note that there are no null values, and the values are treated as objects and not floats, we will have to clean the 
 # '%' sign at the end of all and change it to float
@@ -718,7 +718,7 @@ df['Hyderabad']=df['Hyderabad'].apply(clean)
 
 # Solution Q1
 # We simply call describe on df
-df.describe()
+print(df.describe())
 
 #6.324-4.555
 
@@ -739,7 +739,8 @@ Plot a box plot to analyse the spread of profits for each of the cities. Which c
 
 # Box plot for cities
 sub_df = df[['Delhi', 'Mumbai', 'Jaipur', 'Hyderabad']]
-sub_df.boxplot()
+plt.figure()
+plt.boxplot([sub_df[c].dropna().values for c in sub_df.columns], tick_labels=list(sub_df.columns))
 
 print('''# Crypto Currencies
 
@@ -967,7 +968,7 @@ display(inp1.Installs.head())
 # Question Clean the Installs Column and find the approximate number of apps at the 50th percentile.
 def clean_installs(val):
     return int(val.replace(",","").replace("+",""))
-type(clean_installs("3,000+"))
+print(type(clean_installs("3,000+")))
 inp1.Installs = inp1.Installs.apply(clean_installs)
 display(inp1.Installs.describe())
 

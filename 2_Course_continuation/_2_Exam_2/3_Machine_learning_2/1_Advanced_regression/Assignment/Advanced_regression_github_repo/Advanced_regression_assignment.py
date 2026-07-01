@@ -126,13 +126,13 @@ df['remodel_age'] = df['YrSold'] - df['YearRemodAdd']
 df.drop('GarageYrBlt',axis=1,inplace=True)
 
 # We need to convert some Numerical Column to String columns since they are categorical variables. 
-df.info()
+print(df.info())
 
 # Converting the Year to String since they are categorical features and should not be treated as numerical features
 df[['MSSubClass']] = df[['MSSubClass']].astype(str) 
 df['YrSold'] = df['YrSold'].astype(str)
 df['MoSold'] = df['MoSold'].astype(str)
-df.head()
+print(df.head())
 
 # getting list of columns with Null Values again
 display(round(df.isnull().sum()/len(df.index)*100,2).sort_values(ascending=False)[ round(df.isnull().sum()/len(df.index),2) > 0 ] )
@@ -172,14 +172,14 @@ display(round(df.isnull().sum()/len(df.index)*100,2).sort_values(ascending=False
 #LotFrontage : Replacing Null value with the median of the neighbourhood
 df['LotFrontage'] = df.groupby('Neighborhood')['LotFrontage'].transform(lambda x: x.fillna(x.median()))
 
-round(df.isnull().sum()/len(df.index)*100,5).sort_values(ascending=False)[ round(df.isnull().sum()/len(df.index),5) > 0 ]
+print(round(df.isnull().sum()/len(df.index)*100,5).sort_values(ascending=False)[ round(df.isnull().sum()/len(df.index),5) > 0 ])
 
 
 
 # Filling the Electrical 0.06% rows with the mode
 df['Electrical'] = df['Electrical'].fillna(df['Electrical'].mode()[0])
 
-round(df.isnull().sum()/len(df.index)*100,5).sort_values(ascending=False)
+print(round(df.isnull().sum()/len(df.index)*100,5).sort_values(ascending=False))
 
 
 display(df['Utilities'].value_counts())
@@ -235,13 +235,14 @@ df['Total_porch_sf'] = (df['OpenPorchSF'] + df['3SsnPorch'] + df['EnclosedPorch'
 numerical_columns=[]
 categorical_columns=[]
 for i in df.columns:
-    if df[i].dtypes != 'O':
+    if df[i].dtypes != 'O' and not pd.api.types.is_string_dtype(df[i]):
         numerical_columns.append(i)
     else:
         categorical_columns.append(i)
-df_dummy= pd.get_dummies(df[categorical_columns])   
-df=pd.concat([df,df_dummy],axis=1)
-df= df.drop(categorical_columns,axis=1)
+if categorical_columns:
+    df_dummy= pd.get_dummies(df[categorical_columns])
+    df=pd.concat([df,df_dummy],axis=1)
+    df= df.drop(categorical_columns,axis=1)
 
 display(df.head())
 
@@ -351,7 +352,7 @@ vif['VIF'] = [variance_inflation_factor(X_train_rfe.values, i) for i in range(X_
 vif['VIF'] = round(vif['VIF'], 2)
 vif = vif.sort_values(by = "VIF", ascending = False)
 high_vif = vif[vif['VIF']>10]
-high_vif
+print(high_vif)
 
 # Dropping cols with high VIF
 X_train_rfe2 = X_train_rfe.drop(high_vif.Features,axis=1)
@@ -397,8 +398,8 @@ display('The MSE of the model on the test dataset for optimum alpha is', mean_sq
 ridge_coeff2 = pd.DataFrame(np.atleast_2d(ridge_coef2),columns=X_train_rfe2.columns)
 ridge_coeff2 = ridge_coeff2.T
 ridge_coeff2.rename(columns={0: 'Ridge Co-Efficient'},inplace=True)
-ridge_coeff2.sort_values(by=['Ridge Co-Efficient'], ascending=False,inplace=True)
-ridge_coeff2.head(20)
+print(ridge_coeff2.sort_values(by=['Ridge Co-Efficient'], ascending=False,inplace=True))
+print(ridge_coeff2.head(20))
 
 # Creating a model with an arbitrary alpha to understand the value ranges
 lasso1 = Lasso(alpha=0.0001)        
@@ -440,8 +441,8 @@ display('The MSE of the model on the test dataset for optimum alpha is', mean_sq
 lasso_coeff2 = pd.DataFrame(np.atleast_2d(lasso_coef2),columns=X_train_rfe2.columns)
 lasso_coeff2 = lasso_coeff2.T
 lasso_coeff2.rename(columns={0: "Lasso Co-Efficient"},inplace=True)
-lasso_coeff2.sort_values(by=['Lasso Co-Efficient'], ascending=False,inplace=True)
-lasso_coeff2.head(20)
+print(lasso_coeff2.sort_values(by=['Lasso Co-Efficient'], ascending=False,inplace=True))
+print(lasso_coeff2.head(20))
 
 # Ridge regression model
 display(ridge_final2)
@@ -459,9 +460,9 @@ display('The MSE of the model on the test dataset for doubled alpha is', mean_sq
 ridge_double_coeff = pd.DataFrame(np.atleast_2d(ridge_double_coef),columns=X_train_rfe2.columns)
 ridge_double_coeff = ridge_double_coeff.T
 ridge_double_coeff.rename(columns={0: 'Ridge Doubled Alpha Co-Efficient'},inplace=True)
-ridge_double_coeff.sort_values(by=['Ridge Doubled Alpha Co-Efficient'], ascending=False,inplace=True)
+print(ridge_double_coeff.sort_values(by=['Ridge Doubled Alpha Co-Efficient'], ascending=False,inplace=True))
 display('The most important predictor variables are as follows:')
-ridge_double_coeff.head(20)
+print(ridge_double_coeff.head(20))
 
 # Building Lasso Model by doubling the value of alpha to 0.0002
 lasso_double = Lasso(alpha=0.0002,random_state=100)
@@ -473,9 +474,9 @@ display('The MSE of the model on the test dataset for doubled alpha is', mean_sq
 lasso_double_coeff = pd.DataFrame(np.atleast_2d(lasso_double_coef),columns=X_train_rfe2.columns)
 lasso_double_coeff = lasso_double_coeff.T
 lasso_double_coeff.rename(columns={0: 'Lasso Doubled Alpha Co-Efficient'},inplace=True)
-lasso_double_coeff.sort_values(by=['Lasso Doubled Alpha Co-Efficient'], ascending=False,inplace=True)
+print(lasso_double_coeff.sort_values(by=['Lasso Doubled Alpha Co-Efficient'], ascending=False,inplace=True))
 display('The most important predictor variables are as follows:')
-lasso_double_coeff.head(20)
+print(lasso_double_coeff.head(20))
 
 #Removing the 5 most important predictor variables from the incoming dataset
 X_test_rfe3 = X_test_rfe2.drop(['Total_sqr_footage','GarageArea','TotRmsAbvGrd','OverallCond','LotArea'],axis=1)
@@ -491,9 +492,9 @@ display('The MSE of the model on the test dataset is', mean_squared_error(y_test
 lasso3_coeff = pd.DataFrame(np.atleast_2d(lasso3_coef),columns=X_train_rfe3.columns)
 lasso3_coeff = lasso3_coeff.T
 lasso3_coeff.rename(columns={0: 'Lasso Co-Efficient'},inplace=True)
-lasso3_coeff.sort_values(by=['Lasso Co-Efficient'], ascending=False,inplace=True)
+print(lasso3_coeff.sort_values(by=['Lasso Co-Efficient'], ascending=False,inplace=True))
 display('The most important predictor variables are as follows:')
-lasso3_coeff.head(5)
+print(lasso3_coeff.head(5))
 
 import datetime, pytz; 
 print("Current Time in IST:", datetime.datetime.now(pytz.utc).astimezone(pytz.timezone('Asia/Kolkata')).strftime('%Y-%m-%d %H:%M:%S'))

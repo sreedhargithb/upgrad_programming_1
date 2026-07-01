@@ -90,7 +90,7 @@ display(updated_rating)
 import seaborn as sns
 
 heart = pd.read_csv('https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/2_Course_continuation/_1_Exam_1/1_Statistics_essentials/1_Exploratory_data_analysis/heart.csv')
-heart.head(10)
+print(heart.head(10))
 
 box = sns.boxplot(heart['chol'])
 
@@ -102,7 +102,7 @@ upper_limit = q3 + 1.5*iqr
 
 print(q1,q3,iqr,lower_limit,upper_limit)
 little_heart = heart[(heart['chol']>lower_limit) & (heart['chol']<upper_limit)]
-little_heart.head(10)
+print(little_heart.head(10))
 print(heart.shape,little_heart.shape)
 
 
@@ -138,8 +138,10 @@ plt.show()
 plt.scatter(x,y)
 plt.show()
 
-plt.show(sns.heatmap(matrix,annot=True))
-plt.show(sns.heatmap(matrix,annot=False))
+sns.heatmap(matrix,annot=True)
+plt.show()
+sns.heatmap(matrix,annot=False)
+plt.show()
 
 # 3-d correlation
 

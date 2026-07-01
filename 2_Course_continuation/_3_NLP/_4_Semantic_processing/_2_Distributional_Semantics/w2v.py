@@ -44,7 +44,7 @@ with open('countries.json', 'r') as fout:
 # In[5]:
 
 
-countries['India'][:20]
+print(countries['India'][:20])
 
 
 # In[6]:
@@ -124,7 +124,7 @@ print(len(counter))
 
 # Default vocabulary size of the original model
 
-len(model.wv)
+print(len(model.wv))
 
 
 # In[14]:
@@ -239,7 +239,7 @@ model = KeyedVectors.load('wiki-countries.w2v')
 # In[25]:
 
 
-model
+print(model)
 
 
 # In[26]:

@@ -11,13 +11,13 @@ import pandas as pd
 # Read the given CSV file, and view some sample records
 
 advertising = pd.read_csv("https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/2_Course_continuation/_1_Exam_1/2_Machine_learning/1_Linear_regression/1_2_SLR_with_Python/Simple-Linear-Regression-main/Simple%20Linear%20Regression%20in%20Python/advertising.csv")
-advertising.head()
+print(advertising.head())
 
-advertising.shape
+print(advertising.shape)
 
-advertising.info()
+print(advertising.info())
 
-advertising.describe()
+print(advertising.describe())
 
 import matplotlib.pyplot as plt 
 import seaborn as sns
@@ -36,9 +36,9 @@ X_train, X_test, y_train, y_test = train_test_split(X, y, train_size = 0.7, test
 
 # Let's now take a look at the train dataset
 
-X_train.head()
+print(X_train.head())
 
-y_train.head()
+print(y_train.head())
 
 get_ipython().system('pip install statsmodels')
 
@@ -51,7 +51,7 @@ X_train_sm = sm.add_constant(X_train)
 lr = sm.OLS(y_train, X_train_sm).fit()
 
 # Print the parameters, i.e. the intercept and the slope of the regression line fitted
-lr.params
+print(lr.params)
 
 # Performing a summary operation lists out all the different parameters of the regression line fitted
 print(lr.summary())
@@ -78,7 +78,7 @@ X_test_sm = sm.add_constant(X_test)
 # Predict the y values corresponding to X_test_sm
 y_pred = lr.predict(X_test_sm)
 
-y_pred.head()
+print(y_pred.head())
 
 from sklearn.metrics import mean_squared_error
 from sklearn.metrics import r2_score
@@ -87,7 +87,7 @@ from sklearn.metrics import r2_score
 np.sqrt(mean_squared_error(y_test, y_pred))
 
 r_squared = r2_score(y_test, y_pred)
-r_squared
+print(r_squared)
 
 plt.scatter(X_test, y_test)
 plt.plot(X_test, 6.948 + 0.054 * X_test, 'r')
@@ -96,7 +96,7 @@ plt.show()
 from sklearn.model_selection import train_test_split
 X_train_lm, X_test_lm, y_train_lm, y_test_lm = train_test_split(X, y, train_size = 0.7, test_size = 0.3, random_state = 100)
 
-X_train_lm.shape
+print(X_train_lm.shape)
 
 # Assuming X_train_lm and X_test_lm are pandas Series
 X_train_lm = X_train_lm.values.reshape(-1, 1)
@@ -133,7 +133,7 @@ from sklearn.preprocessing import StandardScaler, MinMaxScaler
 X_train_scaled = X_train.values.reshape(-1,1)
 y_train_scaled = y_train.values.reshape(-1,1)
 
-X_train_scaled.shape
+print(X_train_scaled.shape)
 
 # Create a scaler object using StandardScaler()
 scaler = StandardScaler()
@@ -150,7 +150,7 @@ X_train_scaled = sm.add_constant(X_train_scaled)
 lr_scaled = sm.OLS(y_train_scaled, X_train_scaled).fit()
 
 # Check the parameters
-lr_scaled.params
+print(lr_scaled.params)
 
 print(lr_scaled.summary())
 

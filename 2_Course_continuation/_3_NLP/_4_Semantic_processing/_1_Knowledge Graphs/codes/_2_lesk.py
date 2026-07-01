@@ -21,13 +21,13 @@ Z = 'What is dead may never die.'
 # In[3]:
 
 
-wn.synsets('die')
+print(wn.synsets('die'))
 
 
 # In[4]:
 
 
-wn.synsets('die', pos=wn.NOUN)
+print(wn.synsets('die', pos=wn.NOUN))
 
 
 # In[5]:
@@ -50,45 +50,45 @@ for syn in wn.synsets('die', pos=wn.VERB):
 
 
 print(X)
-wsd.lesk(X.split(), 'die')
+_last_lesk = wsd.lesk(X.split(), 'die')
 
 
 # In[8]:
 
 
-_.definition()
+_last_lesk.definition() if _last_lesk is not None else None
 
 
 # In[9]:
 
 
-wsd.lesk(X.split(), 'die', pos=wn.NOUN).definition()
+print(wsd.lesk(X.split(), 'die', pos=wn.NOUN).definition())
 
 
 # In[10]:
 
 
 print(Y)
-wsd.lesk(Y.split(), 'die').definition()
+print(wsd.lesk(Y.split(), 'die').definition())
 
 
 # In[11]:
 
 
-wsd.lesk(Y.split(), 'die', pos=wn.NOUN).definition()
+print(wsd.lesk(Y.split(), 'die', pos=wn.NOUN).definition())
 
 
 # In[12]:
 
 
 print(Z)
-wsd.lesk(Z.split(), 'die').definition()
+print(wsd.lesk(Z.split(), 'die').definition())
 
 
 # In[13]:
 
 
-wsd.lesk(Z.split(), 'die', pos=wn.VERB).definition()
+print(wsd.lesk(Z.split(), 'die', pos=wn.VERB).definition())
 
 
 # ## Automatic POS Tagging + Lesk with spaCy
@@ -152,19 +152,19 @@ lesk(doc, 'die')
 # In[19]:
 
 
-lesk(doc, 'die').definition()
+print(lesk(doc, 'die').definition())
 
 
 # In[20]:
 
 
-lesk(nlp('I work at google.'), 'google').definition()
+print(lesk(nlp('I work at google.'), 'google').definition())
 
 
 # In[21]:
 
 
-lesk(nlp('I will google it.'), 'google').definition()
+print(lesk(nlp('I will google it.'), 'google').definition())
 
 
 # In[22]:

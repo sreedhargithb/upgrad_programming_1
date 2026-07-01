@@ -44,7 +44,7 @@ email = ('Dear Family, Jose Luis and I have changed our dates, we are '
 processed_email = model(email) # Apply spacy's model to process the email
 
 # intialize data structure to store anonymized email
-# Write your code here.
+anonymized_email = list(email)
 
 for ent in processed_email.ents:
   if(ent.label_ == 'PERSON'): # if the word corresponds to a PERSON entity

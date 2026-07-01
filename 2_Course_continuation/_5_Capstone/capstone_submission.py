@@ -33,57 +33,57 @@ warnings.filterwarnings('ignore')
 
 
 df=pd.read_csv('https://raw.githubusercontent.com/nsethi31/Kaggle-Data-Credit-Card-Fraud-Detection/refs/heads/master/creditcard.csv')
-df.head(10)
+print(df.head(10))
 
 
 # In[39]:
 
 
-df.tail(10)
+print(df.tail(10))
 
 
 # In[40]:
 
 
-df.shape
+print(df.shape)
 
 
 # In[41]:
 
 
-df.info()
+print(df.info())
 
 
 # In[42]:
 
 
-df["Class"].value_counts()
+print(df["Class"].value_counts())
 
 
 # In[43]:
 
 
 df = df.drop(['Time'],axis=1)
-df.head()
+print(df.head())
 
 
 # In[44]:
 
 
-df.shape
+print(df.shape)
 
 
 # In[45]:
 
 
-df.duplicated().any()
+print(df.duplicated().any())
 
 
 # In[46]:
 
 
 df = df.drop_duplicates()
-df.shape
+print(df.shape)
 
 
 # In[47]:
@@ -103,7 +103,7 @@ df.hist(bins=30, figsize=(30, 30))
 # In[49]:
 
 
-df.describe()
+print(df.describe())
 
 
 # Scaling the dataset
@@ -120,7 +120,7 @@ new_df['Amount'].hist();
 # In[51]:
 
 
-new_df['Amount'].describe()
+print(new_df['Amount'].describe())
 
 
 # Copying the contents of the data into new_df
@@ -128,7 +128,7 @@ new_df['Amount'].describe()
 # In[52]:
 
 
-new_df.head()
+print(new_df.head())
 
 
 # Spliting the dataset into training and testing data
@@ -274,7 +274,7 @@ get_ipython().system('pip install imblearn')
 from imblearn.over_sampling import SMOTE
 
 X_res,y_res = SMOTE().fit_resample(X,y)
-y_res.value_counts()
+print(y_res.value_counts())
 
 
 # Train Test Split on Balanced data

@@ -44,14 +44,14 @@ warnings.filterwarnings('ignore')
 
 
 attrition = pd.read_csv('https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/2_Course_continuation/_2_Exam_2/3_Machine_learning_2/6_Boosting/2_Gradient%20Boosting/WA_Fn-UseC_-HR-Employee-Attrition.csv')
-attrition.head()
+print(attrition.head())
 
 
 # In[33]:
 
 
 # Looking for NaN
-attrition.isnull().any()
+print(attrition.isnull().any())
 
 
 # In[34]:
@@ -82,7 +82,7 @@ attrition.isnull().any()
 # In[37]:
 
 
-attrition.dtypes
+print(attrition.dtypes)
 
 
 # In[38]:
@@ -91,7 +91,7 @@ attrition.dtypes
 # Empty list to store columns with categorical data
 categorical = []
 for col, value in attrition.items():
-    if value.dtype == 'object':
+    if value.dtype == 'object' or pd.api.types.is_string_dtype(value):
         categorical.append(col)
 
 # Store the numerical columns in a list numerical
@@ -104,13 +104,13 @@ print("Numerical columns:", numerical)
 # In[39]:
 
 
-numerical
+print(numerical)
 
 
 # In[40]:
 
 
-categorical
+print(categorical)
 
 
 # In[41]:
@@ -124,7 +124,7 @@ attrition_cat = attrition_cat.drop(['Attrition'], axis=1) # Dropping the target 
 # In[42]:
 
 
-attrition_cat
+print(attrition_cat)
 
 
 # Applying the **get_dummies** method
@@ -234,7 +234,7 @@ le.transform(["tokyo", "tokyo", "paris","amsterdam"])
 
 
 attrition_cat = pd.get_dummies(attrition_cat)
-attrition_cat.head(3)
+print(attrition_cat.head(3))
 
 
 # In[46]:
@@ -256,7 +256,7 @@ attrition_final = pd.concat([attrition_num, attrition_cat], axis=1)
 # In[48]:
 
 
-attrition_final.shape
+print(attrition_final.shape)
 
 
 # **Target variable**
@@ -270,7 +270,7 @@ attrition_final.shape
 target_map = {'Yes':1, 'No':0}
 # Use the pandas apply method to numerically encode our attrition target variable
 target = attrition["Attrition"].apply(lambda x: target_map[x])
-target.head(3)
+print(target.head(3))
 
 
 # 
@@ -323,7 +323,7 @@ gb_predictions = gb.predict(test)
 
 
 gb_predictions_prob = gb.predict_proba(test)
-gb_predictions_prob
+print(gb_predictions_prob)
 
 
 # In[54]:
@@ -356,7 +356,7 @@ accuracy_score(target_test, gb_predictions)
 # In[56]:
 
 
-gb.feature_importances_
+print(gb.feature_importances_)
 
 
 # In[57]:

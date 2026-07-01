@@ -49,7 +49,7 @@ image = PIL.Image.open("/kaggle/input/chest-xray-pneumonia/chest_xray/train/PNEU
 # In[11]:
 
 
-image
+print(image)
 
 
 # In[12]:
@@ -61,7 +61,7 @@ image = PIL.Image.open("/kaggle/input/chest-xray-pneumonia/chest_xray/train/NORM
 # In[13]:
 
 
-image
+print(image)
 
 
 # In[14]:

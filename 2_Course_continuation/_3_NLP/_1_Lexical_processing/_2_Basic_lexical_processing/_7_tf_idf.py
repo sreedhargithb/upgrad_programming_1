@@ -51,7 +51,7 @@ pd.DataFrame(tfidf_model.toarray(), columns = vectorizer.get_feature_names_out()
 
 # load data
 spam = pd.read_csv("https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/2_Course_continuation/_3_NLP/_1_Lexical_processing/_2_Basic_lexical_processing/_2_SMSSpamCollection.txt", sep = "\t", names=["label", "message"])
-spam.head()
+print(spam.head())
 
 spam = spam.iloc[0:50,:]
 print(spam)
@@ -70,7 +70,7 @@ tfidf_model = vectorizer.fit_transform(messages)
 
 # Let's look at the dataframe
 tfidf = pd.DataFrame(tfidf_model.toarray(), columns = vectorizer.get_feature_names_out())
-tfidf
+print(tfidf)
 
 # token names
 print(vectorizer.get_feature_names_out())

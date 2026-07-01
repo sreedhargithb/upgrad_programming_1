@@ -48,7 +48,7 @@ data = {"cars_per_cap": cars_per_cap, "country": country, "drives_right": drives
 # In[12]:
 
 
-data
+print(data)
 
 
 # In[13]:
@@ -56,13 +56,13 @@ data
 
 cars = pd.DataFrame(data)
 
-cars
+print(cars)
 
 
 # In[14]:
 
 
-type(cars)
+print(type(cars))
 
 
 # <h4 style = "color : Sky blue"> Example - 2 (Reading data from a file)</h4>  
@@ -75,7 +75,7 @@ type(cars)
 # Read a file using pandas
 
 cars_df = pd.read_csv('https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/1_Prep_sessions/pandas_datasets/Movies.csv')
-cars_df
+print(cars_df)
 
 
 # <h4 style = "color : Sky blue"> Example - 3 (Column headers)</h4>  
@@ -87,7 +87,7 @@ cars_df
 
 cars_df = pd.read_csv('https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/1_Prep_sessions/pandas_datasets/cars.csv', header=None)
 
-cars_df
+print(cars_df)
 
 
 # ##### Assign Headers
@@ -97,7 +97,7 @@ cars_df
 
 # Returns an array of headers
 
-cars_df.columns
+print(cars_df.columns)
 
 
 # In[18]:
@@ -111,7 +111,7 @@ cars_df.columns = ['country code', 'region', 'country', 'cars_per_cap', 'drive_r
 # In[19]:
 
 
-cars_df
+print(cars_df)
 
 
 # <h4 style = "color : Sky blue"> Example - 4 (Row index/names) </h4>  
@@ -122,7 +122,7 @@ cars_df
 
 
 # Index is returned by
-cars_df.index
+print(cars_df.index)
 
 
 # In[21]:
@@ -133,14 +133,14 @@ cars_df = pd.read_csv("https://raw.githubusercontent.com/aqwertyuiop48/upgrad_pr
 
 # set the column names
 cars_df.columns = ['region', 'country', 'cars_per_cap', 'drive_right']
-cars_df
+print(cars_df)
 
 
 # In[22]:
 
 
 # Print the new index
-cars_df.index
+print(cars_df.index)
 
 
 # ##### Rename the Index Name
@@ -149,7 +149,7 @@ cars_df.index
 
 
 cars_df.index.name = 'country_code'
-cars_df
+print(cars_df)
 
 
 # ##### Delete the index name
@@ -158,7 +158,7 @@ cars_df
 
 
 cars_df.index.name = None
-cars_df
+print(cars_df)
 
 
 # ##### Set Hierarchical index
@@ -178,7 +178,7 @@ cars_df.set_index(['region', 'country_code'], inplace=True)
 # In[26]:
 
 
-cars_df
+print(cars_df)
 
 
 # In[ ]:
@@ -219,7 +219,7 @@ print(df)
 df = pd.read_csv('https://media-doselect.s3.amazonaws.com/generic/A08MajL8qN4rq72EpVJbAP1Rw/marks_1.csv', sep='|',header=None) # Write your answer here
 df.columns = ['S.No','Name','Subject','Maximum Marks','Marks Obtained','Percentage']
 df=df.set_index('S.No')
-df
+print(df)
 
 
 # In[30]:
@@ -249,9 +249,9 @@ df_2 = {"col1":[11,12,13,14], "col2": [15,16,17,18]}
 df1 = pd.DataFrame(df_1)
 df2 = pd.DataFrame(df_2)
 
-df1
+print(df1)
 
-df2
+print(df2)
 
 ### Concatenation 
 
@@ -451,7 +451,7 @@ columns_to_drop = [
 ]
 
 # Drop the columns
-movies.drop(columns=columns_to_drop, axis=1, inplace=True)
+movies.drop(columns=columns_to_drop, inplace=True)
 
 # Display the new shape of the dataframe
 print(movies.shape)  # Question 3: The count of columns in the new dataframe will be 15.
@@ -690,12 +690,12 @@ import pandas as pd
 # Read file 
 
 sales = pd.read_excel('https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/1_Prep_sessions/pandas_datasets/sales.xlsx')
-sales
+print(sales)
 
 # Read file and set 1st two columns as index
 sales = pd.read_excel('https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/1_Prep_sessions/pandas_datasets/sales.xlsx', index_col = [0,1])
 
-sales
+print(sales)
 
 display(HTML('''
 <h4 style = "color : Sky blue"> Example - 1</h4>  
@@ -704,13 +704,13 @@ display(HTML('''
 ##### Display first 3 land last 3 rows of the sales dataframe
 
 
-sales.head() # Default - returns top 5 rows
+print(sales.head()) # Default - returns top 5 rows
 
-sales.head(3)
+print(sales.head(3))
 
-sales.tail()
+print(sales.tail())
 
-sales.tail(3)
+print(sales.tail(3))
 
 display(HTML('''
 <h4 style = "color : Sky blue"> Example - 2</h4>   
@@ -719,16 +719,16 @@ display(HTML('''
 ##### Display the information about the data stored in data frame
 
 
-sales.info()
+print(sales.info())
 
 ##### Display the statistical information about the data in dataframe
 
-sales.describe()
+print(sales.describe())
 
 sales[["Sales", "Profit"]].plot(kind= "box", subplots= True)
 plt.show()
 
-sales["Profit"]
+print(sales["Profit"])
 
 
 ##########################################################################################################3
@@ -745,14 +745,14 @@ import pandas as pd
 pd.options.display.float_format = '{:,.2f}'.format
 
 sales = pd.read_excel('https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/1_Prep_sessions/pandas_datasets/sales.xlsx')
-sales
+print(sales)
 
 ##### Sales and Profit data is read in dataframe "sales"
 
 # Read file and set 2nd column as index
 
 sales = pd.read_excel('https://raw.githubusercontent.com/aqwertyuiop48/upgrad_programming/refs/heads/main/1_Prep_sessions/pandas_datasets/sales.xlsx', index_col = [1])
-sales
+print(sales)
 
 display(HTML('''
 <h4 style = "color : Sky blue"> Example - 1 (Column Indexing)</h4>  
@@ -760,15 +760,15 @@ display(HTML('''
 
 ##### Display Sales Column
 
-sales["Sales"]
+print(sales["Sales"])
 
-sales.Sales
+print(sales.Sales)
 
-type(sales["Sales"])
+print(type(sales["Sales"]))
 
 ##### Display Sales and Profit Column together
 
-sales[["Sales", "Profit"]]
+print(sales[["Sales", "Profit"]])
 
 display(HTML('''
 <h4 style = "color : Sky blue"> Example - 2 (Row Indexing)</h4>  
@@ -778,19 +778,19 @@ display(HTML('''
 
 # loc accessor takes row index and column index
 
-sales.loc["Southern Asia"]
+print(sales.loc["Southern Asia"])
 
 ##### Display Sales data for "Southern Asia"
 
-sales.loc["Southern Asia", "Sales"]
+print(sales.loc["Southern Asia", "Sales"])
 
 ##### Display data for "Southern Asia"
 
 # iloc accessor takes row number and column number
 
-sales.iloc[6]
+print(sales.iloc[6])
 
-sales.iloc[6,3]
+print(sales.iloc[6,3])
 
 display(HTML('''
 <h4 style = "color : Sky blue"> Example - 3 (Slicing)</h4>
@@ -798,21 +798,21 @@ display(HTML('''
 
 ##### Display data for  Market, Sales and Profit
 
-sales.loc[:, ["Market", "Sales", "Profit"]].head()
+print(sales.loc[:, ["Market", "Sales", "Profit"]].head())
 
-sales.iloc[:, [0,3,2] ].head()
+print(sales.iloc[:, [0,3,2] ].head())
 
 ##### Display data for Western Africa Southern Africa and North Africa
 
-sales.loc[["Western Africa", "Southern Africa", "North Africa"] ,:]
+print(sales.loc[["Western Africa", "Southern Africa", "North Africa"] ,:])
 
-sales.iloc[0:3, :]
+print(sales.iloc[0:3, :])
 
 ##### Display Sales and Profit data for Western Africa Southern Africa and North Africa
 
-sales.loc[["Western Africa", "Southern Africa", "North Africa"] , ["Sales", "Profit"]]
+print(sales.loc[["Western Africa", "Southern Africa", "North Africa"] , ["Sales", "Profit"]])
 
-sales.iloc[0:3, 2:4]
+print(sales.iloc[0:3, 2:4])
 
 display(HTML('''
 <h4 style = "color : Sky blue"> Example - 4 (Filtering)</h4> 
@@ -822,11 +822,11 @@ display(HTML('''
 
 sales["Sales"] > 300000
 
-sales[ sales["Sales"] > 300000 ]
+print(sales[ sales["Sales"] > 300000 ])
 
 ##### Display the LATAM and Eruopean countries with sales > 250000
 
-sales[  (sales["Market"].isin(["LATAM", "Europe"])) & (sales["Sales"] > 250000)     ]
+print(sales[  (sales["Market"].isin(["LATAM", "Europe"])) & (sales["Sales"] > 250000)     ])
 
 ### Optional Examples 
 
@@ -846,25 +846,25 @@ display(HTML('''
 
 sales.Sales = sales.Sales.floordiv(1000)
 
-sales.head()
+print(sales.head())
 
 sales.rename(columns={'Sales': 'Sales in Thousands'}, inplace=True)
-sales.head()
+print(sales.head())
 
 ##### Replace values in Profit percent of total
 
-sales.head()
+print(sales.head())
 
 #sales['Profit']
 total_sum = sales.Profit.sum()
 sales['Profit % of Total'] = sales.Profit.apply(lambda x: x/total_sum*100)
 
-sales.head()
+print(sales.head())
 
 ##### Replace negative Profits with NAN
 
 sales.loc[sales['Profit']<0, 'Profit'] = np.nan
-sales.head()
+print(sales.head())
 
 
 # <a id='Pandas_Udemy'>Pandas_Udemy</a><br><br>
@@ -948,7 +948,7 @@ display(df[(df['W']>0)|(df['X']<=0)])
 # In[40]:
 
 
-df.reset_index(inplace=False)
+print(df.reset_index(inplace=False))
 #df.set_index('index',inplace=True)
 display(df)
 

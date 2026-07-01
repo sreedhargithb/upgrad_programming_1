@@ -20,13 +20,13 @@ df = pd.read_csv('https://raw.githubusercontent.com/aqwertyuiop48/upgrad_program
 # In[76]:
 
 
-df.columns
+print(df.columns)
 
 
 # In[77]:
 
 
-df.head()
+print(df.head())
 
 
 # In[78]:
@@ -329,7 +329,7 @@ get_ipython().run_cell_magic('time', '', 'grid_search.fit(X_train, y_train)\n')
 
 
 score_df = pd.DataFrame(grid_search.cv_results_)
-score_df.head()
+print(score_df.head())
 
 
 # In[117]:
@@ -341,7 +341,7 @@ score_df.nlargest(5,"mean_test_score")
 # In[119]:
 
 
-grid_search.best_estimator_
+print(grid_search.best_estimator_)
 
 
 # In[121]:

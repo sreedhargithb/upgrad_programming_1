@@ -293,7 +293,7 @@ nltk.download('punkt_tab')
 nltk.download('averaged_perceptron_tagger_eng')
 
 # Add a column for lemmatized complaints to the dataframe
-df["lemmatized_complaint"] =  df["complaint_what_happened"].swifter.apply(lemma_texts)
+df["lemmatized_complaint"] =  df["complaint_what_happened"].apply(lemma_texts)
 
 # View the dataframe
 display(
@@ -335,7 +335,7 @@ def pos_tag(text):
 df_clean["complaint_POS_removed"] =  df_clean.apply(lambda x: pos_tag(x['lemmatized_complaint']), axis=1)
  #this column should contain lemmatized text with all the words removed which have tags other than NN[tag == "NN"].
 #Reassigning index of cleaned dataframe
-df_clean.reset_index(drop=True, inplace = True)
+print(df_clean.reset_index(drop=True, inplace = True))
 
 # View the dataframe
 display(
@@ -383,7 +383,7 @@ bins = [0, 100, 500, 1000, 5000, 10000, 50000]
 temp_df = df_clean['complaint_what_happened'].str.len().to_frame()
 temp_df.columns = ["length"]
 temp_df['binned'] = pd.cut(temp_df['length'], bins)
-temp_df.binned.value_counts()
+print(temp_df.binned.value_counts())
 
 plt.figure(figsize=(12,8))
 temp_df.binned.value_counts().plot(kind="bar")

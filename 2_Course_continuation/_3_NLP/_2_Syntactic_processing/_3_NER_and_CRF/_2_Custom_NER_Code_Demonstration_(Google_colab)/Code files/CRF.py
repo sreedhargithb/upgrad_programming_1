@@ -161,7 +161,7 @@ example_sentence = train_sentences[5]
 print(example_sentence)
 
 features = getFeaturesForOneSentence(example_sentence)
-features[2]
+print(features[2])
 
 
 # Get the features for sentences of X_train and X_test and get the labels of Y_train and Y_test data.

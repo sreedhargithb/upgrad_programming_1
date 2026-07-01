@@ -54,7 +54,7 @@ for review in tqdm(samsung_reviews.split("\n")[0:1000]):
 # In[21]:
 
 
-len(samsung_reviews.split("\n"))
+print(len(samsung_reviews.split("\n")))
 
 
 # In[22]:
@@ -88,13 +88,13 @@ for review in tqdm(samsung_reviews.split("\n")):
 
 
 nouns=pd.Series(nouns)
-nouns.value_counts().head(5)
+print(nouns.value_counts().head(5))
 
 
 # In[26]:
 
 
-nouns.value_counts().head(10)
+print(nouns.value_counts().head(10))
 
 
 # ### We now know that people mention `battery`, `product`, `screen` etc. But we still don't know in what context they mention these keywords

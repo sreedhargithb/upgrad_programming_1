@@ -77,7 +77,7 @@ display(bikes_df)
 
 
 # shape of the dataset
-bikes_df.shape
+print(bikes_df.shape)
 
 
 # In[ ]:
@@ -357,7 +357,7 @@ wind_hum['windspeed']=wind_hum['windspeed'].fillna(wind_hum['windspeed'].mean())
 bikes_df['humidity']=bikes_df['humidity'].replace(wind_hum['humidity'])
 #Replacing the imputated windspeed
 bikes_df['windspeed']=bikes_df['windspeed'].replace(wind_hum['windspeed'])
-bikes_df.head(5)
+print(bikes_df.head(5))
 
 
 # <a id='Normal_Probability_plot'></a>
@@ -425,11 +425,11 @@ from sklearn.model_selection import train_test_split
 X_train,X_test,y_train,y_test=train_test_split(bikes_df.iloc[:,0:-3],bikes_df.iloc[:,-1],test_size=0.3, random_state=42)
 
 #Reset train index values
-X_train.reset_index(inplace=True)
+print(X_train.reset_index(inplace=True))
 y_train=y_train.reset_index()
 
 # Reset train index values
-X_test.reset_index(inplace=True)
+print(X_test.reset_index(inplace=True))
 y_test=y_test.reset_index()
 
 display(X_train.shape,X_test.shape,y_train.shape,y_test.shape)
@@ -467,7 +467,7 @@ num_attributes=['temp','windspeed','humidity','month','weekday']
 
 train_encoded_attributes=pd.get_dummies(train_attributes,columns=cat_attributes)
 print('Shape of transfomed dataframe::',train_encoded_attributes.shape)
-train_encoded_attributes.head(5)
+print(train_encoded_attributes.head(5))
 
 
 # <a id='Models_covered'></a>
@@ -497,9 +497,9 @@ y_train=y_train.total_count.values
 
 #fit the trained model
 lr_model=linear_model.LinearRegression()
-lr_model
+print(lr_model)
 lr_model.fit(X_train,y_train)
-lr_model
+print(lr_model)
 
 
 # <a id='Accuracy_of_model'></a>
@@ -523,7 +523,7 @@ print('Model intercept value :',lr_model.intercept_)
 
 #Cross validation prediction
 predict=cross_val_predict(lr_model,X_train,y_train,cv=3)
-predict
+print(predict)
 
 
 # <a id='Cross_validation_prediction_plot'></a>
@@ -573,7 +573,7 @@ print('R-squared scores :',np.average(r2_scores))
 #To get dummy variables to encode the categorical features to numeric
 test_encoded_attributes=pd.get_dummies(test_attributes,columns=cat_attributes)
 print('Shape of transformed dataframe :',test_encoded_attributes.shape)
-test_encoded_attributes.head(5)
+print(test_encoded_attributes.head(5))
 
 
 # In[ ]:

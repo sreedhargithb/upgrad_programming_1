@@ -39,7 +39,7 @@ for file in os.listdir(ROOT):
 # In[12]:
 
 
-len(reviews)
+print(len(reviews))
 
 
 # In[13]:
@@ -84,7 +84,7 @@ for i in range(N_TOPICS):
     ix = H[i].argsort()[::-1][:10]
     topic_words.iloc[i] = words[ix]
 
-topic_words
+print(topic_words)
 
 
 # In[17]:
@@ -109,13 +109,13 @@ topic_mapping = {
 
 W = pd.DataFrame(W, columns=[f'Topic {i + 1}' for i in range(N_TOPICS)])
 W['max_topic'] = W.apply(lambda x: topic_mapping.get(x.idxmax()), axis=1)
-W[pd.notnull(W['max_topic'])].head(10)
+print(W[pd.notnull(W['max_topic'])].head(10))
 
 
 # In[19]:
 
 
-reviews[58]
+print(reviews[58])
 
 
 # In[20]:

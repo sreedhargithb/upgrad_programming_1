@@ -28,7 +28,7 @@ media = media.drop('Unnamed: 7',axis = 1)
 
 
 #Let's explore the top 5 rows
-media.head()
+print(media.head())
 
 
 # In[4]:
@@ -41,7 +41,7 @@ media['Date'] = pd.to_datetime(media['Date'])
 # In[5]:
 
 
-media.head()
+print(media.head())
 
 
 # In[6]:
@@ -62,7 +62,7 @@ print(media)
 # In[7]:
 
 
-media.head()
+print(media.head())
 
 
 # In[8]:
@@ -77,7 +77,7 @@ media['day'] = media['day'].astype(int)
 # In[9]:
 
 
-media.head()
+print(media.head())
 
 
 # In[10]:
@@ -147,7 +147,7 @@ plt.savefig("pyplot_multiple_y-axis.png", bbox_inches='tight')
 media['weekday'] = (media['day']+3)%7
 media.weekday.replace(0,7, inplace=True)
 media['weekday'] = media['weekday'].astype(int)
-media.head()
+print(media.head())
 
 
 # #### Running first model (lm1) Weekday & visitors 
@@ -210,7 +210,7 @@ media['weekend']=[cond(i) for i in media['day']]
 # In[20]:
 
 
-media.head()
+print(media.head())
 
 
 # #### Running second model (lm2) visitors & weekend
@@ -272,7 +272,7 @@ media.Lag_Views.replace(108961,0, inplace=True)
 # In[26]:
 
 
-media.head()
+print(media.head())
 
 
 # #### Running fourth model (lm4) visitors, Character_A, Lag_views & weekend
