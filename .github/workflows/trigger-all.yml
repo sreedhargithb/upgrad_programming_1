@@ -39,7 +39,7 @@ jobs:
   run-chunk:
     needs: prepare
     runs-on: ubuntu-latest
-    timeout-minutes: 120  # 2 hours per chunk
+    timeout-minutes: 360  # 6 hours per chunk — accommodates CNN training + dataset download
     strategy:
       fail-fast: false
       matrix:
@@ -58,6 +58,43 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y graphviz
 
+      - name: Cache Keras datasets
+        uses: actions/cache@v4
+        with:
+          path: ~/.keras
+          key: keras-datasets-v2-cifar10-mnist
+          restore-keys: |
+            keras-datasets-v2-
+            keras-datasets-
+
+      - name: Pre-warm CIFAR-10 dataset
+        run: |
+          # keras.datasets.cifar10 pulls a 170 MB tarball from cs.toronto.edu, which
+          # aggressively throttles GitHub Actions IPs (~200 KB/s observed = ~14 min).
+          # Download it ONCE here (with a generous curl timeout) into the Keras cache;
+          # subsequent CI runs restore it from actions/cache in seconds.
+          mkdir -p ~/.keras/datasets
+          cd ~/.keras/datasets
+          if [ -f cifar-10-batches-py/data_batch_1 ] && [ -f cifar-10-batches-py/test_batch ]; then
+            echo "CIFAR-10 already cached (data_batch_1 + test_batch present) — skipping download."
+            ls -la cifar-10-batches-py/
+          else
+            echo "CIFAR-10 not cached — downloading from upstream (may take up to 15 minutes)..."
+            # 1200 s = 20 min hard cap on curl; enough headroom for the throttled server.
+            curl -sSL --max-time 1200 --retry 3 --retry-delay 10 \
+              -o cifar-10-python.tar.gz \
+              https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz
+            echo "Download complete; extracting..."
+            tar -xzf cifar-10-python.tar.gz
+            rm cifar-10-python.tar.gz
+            ls -la cifar-10-batches-py/
+          fi
+          # Copy the tarball form that keras.utils.get_file expects as well, so if a
+          # future keras version re-checks for the archive it still finds it locally.
+          if [ ! -f cifar-10-batches-py.tar.gz ] && [ -d cifar-10-batches-py ]; then
+            tar -czf cifar-10-batches-py.tar.gz cifar-10-batches-py
+          fi
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -69,7 +106,7 @@ jobs:
           pip install jupyter ipython nbformat
           pip install plotly
           pip install "kagglehub==0.3.4" kaggle sklearn-crfsuite
-          pip install scikit-image graphviz pydot
+          pip install scikit-image graphviz pydot pydotplus
           
           python -c "import nltk; nltk.download('punkt'); nltk.download('punkt_tab'); nltk.download('stopwords'); nltk.download('wordnet'); nltk.download('averaged_perceptron_tagger'); nltk.download('averaged_perceptron_tagger_eng'); nltk.download('omw-1.4')" || true
           python -m spacy download en_core_web_sm || true
@@ -92,6 +129,31 @@ jobs:
             "skin_cancer_detection_melanoma.py"
             "working-with-chest-xray-images.py"
           )
+          
+          # Per-script custom timeout (seconds). Anything not in this map uses
+          # DEFAULT_TIMEOUT (300 s = 5 min). Longer budgets are granted only to
+          # heavy CNN training / large GridSearchCV / RandomizedSearchCV scripts
+          # whose ORIGINAL notebook hyperparameters (epochs, cv, n_iter, param
+          # grid sizes) genuinely exceed 5 min on a 2-vCPU runner. Source files
+          # are left unchanged.
+          DEFAULT_TIMEOUT=300
+          declare -A CUSTOM_TIMEOUT
+          # CNN scripts — CIFAR-10 @ 50 epochs on CPU ~25-30 min each
+          CUSTOM_TIMEOUT["1_+Cifar_10_with_dropout_without_Batch_Normalization_(BN).py"]=2700
+          CUSTOM_TIMEOUT["2_+Cifar_10_Notebook_with_BN_without_dropout.py"]=2700
+          CUSTOM_TIMEOUT["3_+Cifar_10_notebook.py"]=2700
+          CUSTOM_TIMEOUT["4_+Cifar10_l2_notebook.py"]=2700
+          CUSTOM_TIMEOUT["5_+Cifar10_l2_dropout_notebook.py"]=2700
+          CUSTOM_TIMEOUT["6_+Cifar10_morelayer_notebook.py"]=2700
+          CUSTOM_TIMEOUT["7_+Cifar10_feature_map_updated.py"]=2700
+          # Flowers CNN — 5-class, 3670 imgs, 50 epochs on CPU ~32 min
+          CUSTOM_TIMEOUT["flower_recognition_cnn_keras.py"]=2700
+          # RNN code generator — 20 epochs × ~111 s/epoch ≈ 37 min
+          CUSTOM_TIMEOUT["_2_rnn_code_generator_Copy1.py"]=2700
+          # XGBoost RandomizedSearchCV — hundreds of combos on CPU
+          CUSTOM_TIMEOUT["3_Xgboost-Classification+Example.py"]=2700
+          # Ticket classification — multiple GridSearchCVs, cv=10
+          CUSTOM_TIMEOUT["Automatic_Ticket_Classification_Muni_Sreedhar.py"]=3600
           
           is_skipped() {
             local name="$1"
@@ -123,10 +185,15 @@ jobs:
           failed=0
           skipped=0
           
+          # Per-script status file (one row per script) — consumed by the summary job.
+          status_file="results/status_chunk_${chunk}.csv"
+          echo "chunk,index,script,status,exit_code" > "$status_file"
+          
           for i in $(seq $start $((end - 1))); do
             script="${scripts[$i]}"
             script_name=$(basename "$script")
             script_dir=$(dirname "$script")
+            script_rel="${script#./}"
             
             echo "=============================================="
             echo "[$((i+1))/$total] Running: $script"
@@ -137,22 +204,38 @@ jobs:
               echo "SKIPPED (in skip list)" > "$script_dir/output_${script_name%.py}.log"
               skipped=$((skipped + 1))
               cp "$script_dir/output_${script_name%.py}.log" "results/" 2>/dev/null || true
+              echo "${chunk},$((i+1)),${script_rel},SKIPPED,0" >> "$status_file"
               continue
             fi
             
             cd "$script_dir"
             # Use ipython to handle get_ipython() calls
-            timeout 300 ipython --no-banner "$script_name" > "output_${script_name%.py}.log" 2>&1 && {
+            script_timeout="${CUSTOM_TIMEOUT[$script_name]:-$DEFAULT_TIMEOUT}"
+            if [ "$script_timeout" != "$DEFAULT_TIMEOUT" ]; then
+              echo "(custom timeout: ${script_timeout}s)"
+            fi
+            set +e
+            timeout "$script_timeout" ipython --no-banner "$script_name" > "output_${script_name%.py}.log" 2>&1
+            rc=$?
+            set -e
+            if [ $rc -eq 0 ]; then
               echo "SUCCESS"
               success=$((success + 1))
-            } || {
-              echo "FAILED (exit: $?)"
+              status_label="PASSED"
+            elif [ $rc -eq 124 ]; then
+              echo "FAILED (exit: 124 — timeout)"
               failed=$((failed + 1))
-            }
+              status_label="TIMEOUT"
+            else
+              echo "FAILED (exit: $rc)"
+              failed=$((failed + 1))
+              status_label="FAILED"
+            fi
             cd - > /dev/null
             
             # Save output
             cp "$script_dir/output_${script_name%.py}.log" "results/" 2>/dev/null || true
+            echo "${chunk},$((i+1)),${script_rel},${status_label},${rc}" >> "$status_file"
           done
           
           echo ""
@@ -181,13 +264,85 @@ jobs:
 
       - name: Generate summary
         run: |
-          echo "## Run All Scripts Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          echo "| Metric | Value |" >> $GITHUB_STEP_SUMMARY
-          echo "|--------|-------|" >> $GITHUB_STEP_SUMMARY
-          echo "| Total Scripts | ${{ needs.prepare.outputs.total }} |" >> $GITHUB_STEP_SUMMARY
-          echo "| Chunks | 24 |" >> $GITHUB_STEP_SUMMARY
-          echo "| Results | $(ls all-results/*.log 2>/dev/null | wc -l) logs |" >> $GITHUB_STEP_SUMMARY
+          set -euo pipefail
+          
+          # Merge every per-chunk status CSV into one
+          combined="all-results/status_combined.csv"
+          echo "chunk,index,script,status,exit_code" > "$combined"
+          for f in all-results/status_chunk_*.csv; do
+            [ -f "$f" ] || continue
+            tail -n +2 "$f" >> "$combined"
+          done
+          
+          # Sort rows by original script index
+          tmp=$(mktemp)
+          head -n 1 "$combined" > "$tmp"
+          tail -n +2 "$combined" | sort -t, -k2,2n >> "$tmp"
+          mv "$tmp" "$combined"
+          
+          total_expected="${{ needs.prepare.outputs.total }}"
+          total_recorded=$(( $(wc -l < "$combined") - 1 ))
+          passed=$(awk -F, 'NR>1 && $4=="PASSED"  {c++} END{print c+0}' "$combined")
+          failed=$(awk -F, 'NR>1 && $4=="FAILED"  {c++} END{print c+0}' "$combined")
+          timeout=$(awk -F, 'NR>1 && $4=="TIMEOUT" {c++} END{print c+0}' "$combined")
+          skipped=$(awk -F, 'NR>1 && $4=="SKIPPED" {c++} END{print c+0}' "$combined")
+          missing=$(( total_expected - total_recorded ))
+          
+          {
+            echo "## Run All Scripts Summary"
+            echo ""
+            echo "| Metric | Value |"
+            echo "|--------|-------|"
+            echo "| Total scripts (discovered) | ${total_expected} |"
+            echo "| Total scripts (recorded)   | ${total_recorded} |"
+            echo "| ✅ Passed  | ${passed} |"
+            echo "| ❌ Failed  | ${failed} |"
+            echo "| ⏱️ Timeout | ${timeout} |"
+            echo "| ⏭️ Skipped | ${skipped} |"
+            echo "| ❓ Missing (chunk did not run) | ${missing} |"
+            echo "| Chunks | 24 |"
+            echo ""
+          } >> "$GITHUB_STEP_SUMMARY"
+          
+          # Emit failed / timeout / skipped tables first (most useful to inspect)
+          emit_table() {
+            local label="$1"
+            local icon="$2"
+            local match="$3"
+            local rows
+            rows=$(awk -F, -v m="$match" 'NR>1 && $4==m {print}' "$combined")
+            local count
+            count=$(printf '%s\n' "$rows" | grep -c . || true)
+            echo "### ${icon} ${label} (${count})" >> "$GITHUB_STEP_SUMMARY"
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+            if [ "$count" -eq 0 ]; then
+              echo "_None._" >> "$GITHUB_STEP_SUMMARY"
+            else
+              echo "| # | Chunk | Script | Exit |" >> "$GITHUB_STEP_SUMMARY"
+              echo "|---|-------|--------|------|" >> "$GITHUB_STEP_SUMMARY"
+              printf '%s\n' "$rows" | awk -F, '{printf "| %s | %s | `%s` | %s |\n", $2, $1, $3, $5}' >> "$GITHUB_STEP_SUMMARY"
+            fi
+            echo "" >> "$GITHUB_STEP_SUMMARY"
+          }
+          
+          emit_table "Failed"  "❌"    "FAILED"
+          emit_table "Timeout" "⏱️"  "TIMEOUT"
+          emit_table "Skipped" "⏭️"  "SKIPPED"
+          
+          # Full listing (collapsed) for reference
+          {
+            echo "<details><summary>📄 Full per-script status (${total_recorded})</summary>"
+            echo ""
+            echo "| # | Chunk | Script | Status | Exit |"
+            echo "|---|-------|--------|--------|------|"
+            awk -F, 'NR>1 {printf "| %s | %s | `%s` | %s | %s |\n", $2, $1, $3, $4, $5}' "$combined"
+            echo ""
+            echo "</details>"
+          } >> "$GITHUB_STEP_SUMMARY"
+          
+          # Also print to the job log for CLI/curl consumers
+          echo "---- status_combined.csv ----"
+          cat "$combined"
 
       - name: Upload combined results
         uses: actions/upload-artifact@v4

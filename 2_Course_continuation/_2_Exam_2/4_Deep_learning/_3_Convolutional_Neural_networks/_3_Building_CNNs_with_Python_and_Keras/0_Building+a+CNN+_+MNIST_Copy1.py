@@ -1,4 +1,4 @@
-et_ipython().system('pip install tensorflow')
+get_ipython().system('pip install tensorflow')
 import numpy as np
 import random
 import tensorflow as tf
@@ -32,7 +32,7 @@ input_shape = (img_rows, img_cols, 1)
 # batch size, number of classes, epochs
 batch_size = 128
 num_classes = 10
-import os as _os_ci; epochs = int(_os_ci.environ.get('CI_EPOCHS', '12'))
+epochs = 12
 
 # reshape x_train and x_test
 x_train = x_train.reshape(x_train.shape[0], img_rows, img_cols, 1)

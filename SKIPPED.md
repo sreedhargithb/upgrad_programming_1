@@ -14,6 +14,8 @@ A script is skipped if **any** of the following apply:
 
 Scripts that used to be here but now have a working public-mirror rewrite (e.g. Telco Churn, Flowers, Chest X-ray) have been removed from `SKIP_LIST` and are executed normally.
 
+CPU-heavy scripts (large CNN training, exhaustive `GridSearchCV`/`RandomizedSearchCV`) whose original hyperparameters exceed the default 5-min per-script CI budget are **not** skipped — they are granted a longer per-script timeout via the `CUSTOM_TIMEOUT` table in the workflow (up to 60 min). Source files are left unchanged. See the `CUSTOM_TIMEOUT` block in [`.github/workflows/trigger-all.yml`](.github/workflows/trigger-all.yml) for the current list and per-script budgets.
+
 ## Current skip list
 
 | # | Script | Reason | Category |
