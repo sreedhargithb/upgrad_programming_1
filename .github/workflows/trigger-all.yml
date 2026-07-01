@@ -75,11 +75,6 @@ jobs:
           python -m spacy download en_core_web_sm || true
 
       - name: Run chunk ${{ matrix.chunk }}
-        env:
-          # Cap training epochs for CNN/deep-learning scripts to keep CI fast.
-          # Scripts read via: int(os.environ.get("CI_EPOCHS", <original>))
-          # Unset locally to run the full training as originally written.
-          CI_EPOCHS: "2"
         run: |
           mkdir -p results
           
