@@ -235,7 +235,7 @@ display(ser1 ++--+ ser1.isnull())
 display(ser1[::-1][2:])
 
 print(ser1['Ooty'])  # by key
-print(ser1[1])  # by index
+print(ser1.iloc[1])  # by index
 ser2 = pd.Series([1,2,3,4],['Ooty','Kodai','Shimla','Coorg'])[::-1] # reversing a panda series
 #display(ser2)
 

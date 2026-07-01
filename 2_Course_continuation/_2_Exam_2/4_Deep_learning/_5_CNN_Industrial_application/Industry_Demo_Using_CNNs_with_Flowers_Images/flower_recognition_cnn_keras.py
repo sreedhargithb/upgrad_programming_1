@@ -9,19 +9,25 @@
 # In[31]:
 
 
-import kagglehub
-
-# Download latest version
-path = kagglehub.dataset_download("alxmamaev/flowers-recognition")
-
-print("Path to dataset files:", path)
+# Public no-auth mirror: TensorFlow's flower_photos (same 5 classes as the Kaggle
+# alxmamaev/flowers-recognition dataset). Kaggle version needs auth (unavailable on CI).
+import os as _os, urllib.request as _urlreq, tarfile as _tarfile
+_FLOWERS_URL = "https://storage.googleapis.com/download.tensorflow.org/example_images/flower_photos.tgz"
+_FLOWERS_TGZ = "/tmp/flower_photos.tgz"
+_FLOWERS_BASE = "/tmp/flower_photos"
+if not _os.path.exists(_FLOWERS_TGZ):
+    print("Downloading flowers dataset (~218 MB)...")
+    _urlreq.urlretrieve(_FLOWERS_URL, _FLOWERS_TGZ)
+if not _os.path.isdir(_FLOWERS_BASE):
+    with _tarfile.open(_FLOWERS_TGZ) as _t:
+        _t.extractall("/tmp/")
+print("Flowers dataset base:", _FLOWERS_BASE)
 
 
 # In[32]:
 
 
-get_ipython().system('ls /kaggle/input/flowers-recognition')
-get_ipython().system('cd')
+print(_os.listdir(_FLOWERS_BASE))
 
 
 # ## CONTENTS ::
@@ -107,11 +113,12 @@ from PIL import Image
 X=[]
 Z=[]
 IMG_SIZE=150
-FLOWER_DAISY_DIR='/kaggle/input/flowers-recognition/flowers/daisy'
-FLOWER_SUNFLOWER_DIR='/kaggle/input/flowers-recognition/flowers/sunflower'
-FLOWER_TULIP_DIR='/kaggle/input/flowers-recognition/flowers/tulip'
-FLOWER_DANDI_DIR='/kaggle/input/flowers-recognition/flowers/dandelion'
-FLOWER_ROSE_DIR='/kaggle/input/flowers-recognition/flowers/rose'
+# TF's flower_photos uses plural folder names (roses/sunflowers/tulips) vs Kaggle's singular.
+FLOWER_DAISY_DIR=_FLOWERS_BASE + '/daisy'
+FLOWER_SUNFLOWER_DIR=_FLOWERS_BASE + '/sunflowers'
+FLOWER_TULIP_DIR=_FLOWERS_BASE + '/tulips'
+FLOWER_DANDI_DIR=_FLOWERS_BASE + '/dandelion'
+FLOWER_ROSE_DIR=_FLOWERS_BASE + '/roses'
 
 
 # In[35]:

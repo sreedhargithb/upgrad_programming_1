@@ -37,13 +37,23 @@ import matplotlib.pyplot as plt #for basic plotting
 # In[10]:
 
 
-import kagglehub
-
-# Download latest version
-path = kagglehub.dataset_download("paultimothymooney/chest-xray-pneumonia")
-
-print("Path to dataset files:", path)
-image = PIL.Image.open("/kaggle/input/chest-xray-pneumonia/chest_xray/train/PNEUMONIA/person1000_bacteria_2931.jpeg")
+# Public no-auth mirror on Mendeley Data (same source as Kaggle chest-xray-pneumonia).
+# The Kaggle version needs auth which is unavailable on CI runners.
+import os as _os, urllib.request as _urlreq, zipfile as _zipfile, glob as _glob
+_XRAY_URL = "https://data.mendeley.com/public-files/datasets/rscbjbr9sj/files/f12eaf6d-6023-432f-acc9-80c9d7393433/file_downloaded"
+_XRAY_ZIP = "/tmp/chest_xray.zip"
+_XRAY_EXTRACT = "/tmp/chest_xray_extracted"
+if not _os.path.exists(_XRAY_ZIP):
+    print("Downloading chest x-ray dataset (~1.15 GB)...")
+    _urlreq.urlretrieve(_XRAY_URL, _XRAY_ZIP)
+if not _os.path.isdir(_XRAY_EXTRACT):
+    with _zipfile.ZipFile(_XRAY_ZIP) as _z:
+        _z.extractall(_XRAY_EXTRACT)
+_hits = _glob.glob(_XRAY_EXTRACT + "/**/chest_xray", recursive=True)
+CHEST_XRAY_BASE = _hits[0] if _hits else _XRAY_EXTRACT
+print("Chest X-ray base:", CHEST_XRAY_BASE)
+_pneumonia_imgs = sorted(_glob.glob(CHEST_XRAY_BASE + "/train/PNEUMONIA/*.jpeg"))
+image = PIL.Image.open(_pneumonia_imgs[0])
 
 
 # In[11]:
@@ -55,7 +65,8 @@ print(image)
 # In[12]:
 
 
-image = PIL.Image.open("/kaggle/input/chest-xray-pneumonia/chest_xray/train/NORMAL/IM-0115-0001.jpeg")
+_normal_imgs = sorted(_glob.glob(CHEST_XRAY_BASE + "/train/NORMAL/*.jpeg"))
+image = PIL.Image.open(_normal_imgs[0])
 
 
 # In[13]:
@@ -74,7 +85,7 @@ from tensorflow.keras.preprocessing.image import ImageDataGenerator #take whole 
 
 
 # to train the model
-training_dir = "/kaggle/input/chest-xray-pneumonia/chest_xray/train/"
+training_dir = CHEST_XRAY_BASE + "/train/"
 training_generator = ImageDataGenerator(rescale = 1/255) # rescale the images or divide each pixel to 255
 data_train = training_generator.flow_from_directory(training_dir, target_size = (120, 120), batch_size = 8, class_mode = "binary") # load data from training directory to train the model
 
@@ -83,7 +94,7 @@ data_train = training_generator.flow_from_directory(training_dir, target_size = 
 
 
 # Define validation generator
-valid_dir = "/kaggle/input/chest-xray-pneumonia/chest_xray/val/"
+valid_dir = CHEST_XRAY_BASE + "/val/"
 validation_generator = ImageDataGenerator(rescale = 1/255)
 data_valid = validation_generator.flow_from_directory(valid_dir, target_size = (120, 120), batch_size = 8, class_mode = "binary") #load data from validation directory
 
@@ -92,7 +103,7 @@ data_valid = validation_generator.flow_from_directory(valid_dir, target_size = (
 
 
 # Define the test generator
-test_dir = "/kaggle/input/chest-xray-pneumonia/chest_xray/test/"
+test_dir = CHEST_XRAY_BASE + "/test/"
 test_generator = ImageDataGenerator(rescale = 1/255)
 data_test = test_generator.flow_from_directory(test_dir, target_size = (120, 120), batch_size = 8, class_mode = "binary")
 

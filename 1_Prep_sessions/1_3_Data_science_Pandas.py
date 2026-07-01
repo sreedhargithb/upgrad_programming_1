@@ -896,7 +896,7 @@ display(pd.Series(data = labels))
 display(pd.Series(data = [sum,print,len]))
 
 a = pd.Series([1,2,3,4],['-1','-2','-3','-4'])
-display(a[0],a[1])
+display(a.iloc[0], a.iloc[1])
 b = pd.Series([1,2,3,4],['-1','-5','-3','-4'])
 print(a + b)
 print(a - b)

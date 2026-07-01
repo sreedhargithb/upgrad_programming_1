@@ -31,11 +31,11 @@ from sklearn.model_selection import GridSearchCV
 # In[7]:
 
 
-import kagglehub
-# Download latest version
-path = kagglehub.dataset_download("blastchar/telco-customer-churn")
-print("Path to dataset files:", path)
-df=pd.read_csv('/kaggle/input/telco-customer-churn/WA_Fn-UseC_-Telco-Customer-Churn.csv')
+# Public no-auth mirror of the same dataset (IBM's Telco Customer Churn CSV).
+# Original Kaggle source (blastchar/telco-customer-churn) requires kaggle auth,
+# which is not available on CI runners.
+_DATA_URL = "https://raw.githubusercontent.com/IBM/telco-customer-churn-on-icp4d/master/data/Telco-Customer-Churn.csv"
+df = pd.read_csv(_DATA_URL)
 print(df.head())
 
 
