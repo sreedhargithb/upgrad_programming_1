@@ -32,8 +32,14 @@ jobs:
           
           # Create 24 chunks (about 5 scripts each) so CNN-heavy sections
           # split across more runners instead of one runner training 10 CNNs serially.
+          #
+          # Chunks 9 and 10 hold the 7 heavy CIFAR-10 CNN scripts (50 epochs on
+          # CPU, ~1-2 h each), so those two chunks are FURTHER split into one
+          # sub-chunk per script: 9_1..9_5 and 10_1..10_5. Each sub-chunk runs
+          # exactly one script on its own runner, so a single script can use
+          # the entire 6-hour job budget instead of sharing it with 4 others.
           if [ "${{ github.event.inputs.chunk }}" = "all" ]; then
-            echo 'chunks=["1","2","3","4","5","6","7","8","9","10","11","12","13","14","15","16","17","18","19","20","21","22","23","24"]' >> $GITHUB_OUTPUT
+            echo 'chunks=["1","2","3","4","5","6","7","8","9_1","9_2","9_3","9_4","9_5","10_1","10_2","10_3","10_4","10_5","11","12","13","14","15","16","17","18","19","20","21","22","23","24"]' >> $GITHUB_OUTPUT
           else
             echo 'chunks=["${{ github.event.inputs.chunk }}"]' >> $GITHUB_OUTPUT
           fi
@@ -97,6 +103,19 @@ jobs:
     needs: prepare
     runs-on: ubuntu-latest
     timeout-minutes: 360  # 6 hours per chunk — accommodates CNN training + dataset download
+    env:
+      # Force stdout/stderr to be unbuffered so Keras per-epoch summaries,
+      # tqdm bars and any print() calls flush to the log immediately.
+      # Without this, Python block-buffers when its stdout is a pipe/file,
+      # so we only see output when the process exits — which never happens
+      # when `timeout` kills a training run with exit 124, leaving the log
+      # empty. With PYTHONUNBUFFERED=1 the log preserves the last completed
+      # epoch even after a timeout.
+      PYTHONUNBUFFERED: "1"
+      # Also disable the TensorFlow C++ INFO logs to keep the output focused
+      # on the model's own progress lines. (0=all, 1=INFO off, 2=+WARNING off,
+      # 3=+ERROR off.) Level 2 keeps errors visible.
+      TF_CPP_MIN_LOG_LEVEL: "2"
     strategy:
       fail-fast: false
       matrix:
@@ -177,14 +196,18 @@ jobs:
           # are left unchanged.
           DEFAULT_TIMEOUT=300
           declare -A CUSTOM_TIMEOUT
-          # CNN scripts — CIFAR-10 @ 50 epochs on CPU ~25-30 min each
-          CUSTOM_TIMEOUT["1_+Cifar_10_with_dropout_without_Batch_Normalization_(BN).py"]=2700
-          CUSTOM_TIMEOUT["2_+Cifar_10_Notebook_with_BN_without_dropout.py"]=2700
-          CUSTOM_TIMEOUT["3_+Cifar_10_notebook.py"]=2700
-          CUSTOM_TIMEOUT["4_+Cifar10_l2_notebook.py"]=2700
-          CUSTOM_TIMEOUT["5_+Cifar10_l2_dropout_notebook.py"]=2700
-          CUSTOM_TIMEOUT["6_+Cifar10_morelayer_notebook.py"]=2700
-          CUSTOM_TIMEOUT["7_+Cifar10_feature_map_updated.py"]=2700
+          # CIFAR-10 CNNs @ 50 epochs on 2-vCPU CPU take ~1-2 h each. These are
+          # isolated into per-script sub-chunks (9_1..9_5, 10_1..10_5), so each
+          # script has the full runner to itself — give it 21000 s (5 h 50 m),
+          # just under GitHub Actions' 6 h (360 min) hard job timeout.
+          CIFAR_TIMEOUT=21000
+          CUSTOM_TIMEOUT["1_+Cifar_10_with_dropout_without_Batch_Normalization_(BN).py"]=$CIFAR_TIMEOUT
+          CUSTOM_TIMEOUT["2_+Cifar_10_Notebook_with_BN_without_dropout.py"]=$CIFAR_TIMEOUT
+          CUSTOM_TIMEOUT["3_+Cifar_10_notebook.py"]=$CIFAR_TIMEOUT
+          CUSTOM_TIMEOUT["4_+Cifar10_l2_notebook.py"]=$CIFAR_TIMEOUT
+          CUSTOM_TIMEOUT["5_+Cifar10_l2_dropout_notebook.py"]=$CIFAR_TIMEOUT
+          CUSTOM_TIMEOUT["6_+Cifar10_morelayer_notebook.py"]=$CIFAR_TIMEOUT
+          CUSTOM_TIMEOUT["7_+Cifar10_feature_map_updated.py"]=$CIFAR_TIMEOUT
           # Flowers CNN — 5-class, 3670 imgs, 50 epochs on CPU ~32 min
           CUSTOM_TIMEOUT["flower_recognition_cnn_keras.py"]=2700
           # RNN code generator — 20 epochs × ~111 s/epoch ≈ 37 min
@@ -208,17 +231,38 @@ jobs:
           mapfile -t scripts < <(find . -name "*.py" -type f ! -path "./.github/*" | sort)
           total=${#scripts[@]}
           
-          # Calculate chunk boundaries (24 chunks)
+          # Chunk id may be "N" (whole chunk, 5 scripts) or "N_K" (Kth script
+          # of chunk N — 1-indexed within the chunk). Sub-chunks let a single
+          # long-running script (CIFAR CNN, ~1-2 h) monopolise a full runner
+          # instead of sharing the 6-hour job budget with 4 other scripts.
           chunk_size=$(( (total + 23) / 24 ))
-          chunk=${{ matrix.chunk }}
-          start=$(( (chunk - 1) * chunk_size ))
-          end=$(( start + chunk_size ))
-          
+          chunk_id='${{ matrix.chunk }}'
+          if [[ "$chunk_id" == *_* ]]; then
+            parent_chunk="${chunk_id%_*}"
+            sub_idx="${chunk_id#*_}"
+            base_start=$(( (parent_chunk - 1) * chunk_size ))
+            start=$(( base_start + sub_idx - 1 ))
+            end=$(( start + 1 ))
+            # Guard against a sub-index past the parent chunk's real end
+            parent_end=$(( base_start + chunk_size ))
+            if [ $parent_end -gt $total ]; then parent_end=$total; fi
+            if [ $start -ge $parent_end ]; then
+              echo "Sub-chunk $chunk_id points past end of parent chunk (script $((start+1)) > $parent_end). Nothing to do."
+              start=0; end=0
+            fi
+          else
+            parent_chunk="$chunk_id"
+            start=$(( (parent_chunk - 1) * chunk_size ))
+            end=$(( start + chunk_size ))
+          fi
           if [ $end -gt $total ]; then
             end=$total
           fi
+          # `chunk` is used as the label in status CSV rows and file names —
+          # keep it as the full id (with underscore) so sub-chunks stay distinct.
+          chunk="$chunk_id"
           
-          echo "Chunk $chunk: scripts $((start+1)) to $end of $total"
+          echo "Chunk $chunk_id: scripts $((start+1)) to $end of $total"
           
           success=0
           failed=0
@@ -261,8 +305,23 @@ jobs:
               echo "(custom timeout: ${script_timeout}s)"
             fi
             set +e
-            timeout "$script_timeout" ipython --no-banner "$script_name" > "output_${script_name%.py}.log" 2>&1
+            # `stdbuf -oL -eL` forces line-buffering on the child's stdout and
+            # stderr, so partial output (Keras epoch summaries, prints, etc.)
+            # is flushed to the log file as it happens rather than on process
+            # exit. Combined with PYTHONUNBUFFERED=1 above, this means the log
+            # shows "Epoch 27/50 - loss: 1.42" in real time and preserves the
+            # last completed epoch even when `timeout` kills training (rc=124).
+            log_file="output_${script_name%.py}.log"
+            stdbuf -oL -eL timeout "$script_timeout" ipython --no-banner "$script_name" > "$log_file" 2>&1 &
+            script_pid=$!
+            # Mirror the log to the job console in the background so live
+            # progress is visible in the GitHub Actions UI while the script
+            # runs. `--pid` makes tail exit when the script does.
+            tail -n +1 -f --pid="$script_pid" "$log_file" &
+            tail_pid=$!
+            wait "$script_pid"
             rc=$?
+            wait "$tail_pid" 2>/dev/null || true
             set -e
             if [ $rc -eq 0 ]; then
               echo "SUCCESS"
