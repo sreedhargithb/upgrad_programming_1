@@ -6,11 +6,14 @@ that `keras.datasets.cifar10.load_data()` expects, without ever hitting
 the throttled cs.toronto.edu server (unless every alternative fails).
 
 Strategy order (each is tried until one succeeds):
-  1. Direct tarball download from HTTP mirrors, using aria2c with 8 parallel
-     connections + resume. cs.toronto.edu is only used as a last resort.
+  1. HuggingFace datasets uoft-cs/cifar10     (parquet on hf.co CDN — fast,
+     no rate-limit from GitHub Actions IPs).
   2. tensorflow-datasets with try_gcs=True    (pulls prepared arrays from
-     storage.googleapis.com/tfds-data — very fast from GitHub Actions).
-  3. HuggingFace datasets uoft-cs/cifar10     (parquet on hf.co CDN — fast).
+     storage.googleapis.com/tfds-data — also very fast).
+  3. Direct tarball download from cs.toronto.edu with aria2c + urllib
+     fallback. LAST RESORT: this host aggressively throttles GitHub IPs
+     down to ~5 KB/s (sometimes 0 B/s) so we cap it at 6 minutes wall-time
+     total — if it can't finish in that window we bail rather than hang.
 
 If any strategy produces the arrays, we reconstruct the exact pickle format
 Keras expects. That way keras.utils.get_file's local-cache check succeeds
@@ -99,78 +102,111 @@ def _tarball_looks_good():
         return TARBALL_PATH.stat().st_size >= EXPECTED_SIZE - 1_000_000
 
 
+# Hard wall-clock budget for the cs.toronto.edu strategy. If the host is
+# stalling (frequent when hit from GitHub Actions IPs) we must bail rather
+# than hang the job for hours — the other strategies will have already tried
+# by the time we reach this one, so failure here is terminal anyway.
+TARBALL_BUDGET_SECONDS = 360  # 6 minutes total across aria2c + urllib
+
+
 def strategy_tarball():
-    """Download the real tarball via aria2c multi-connection."""
-    log("Strategy 1: aria2c multi-connection tarball download")
+    """Download the real tarball via aria2c multi-connection, with hard time cap."""
+    log("Strategy 3: aria2c multi-connection tarball download (cs.toronto.edu)")
+    log(f"  Total wall-clock budget for this strategy: {TARBALL_BUDGET_SECONDS}s")
     KERAS_DIR.mkdir(parents=True, exist_ok=True)
+
+    started = time.time()
+
+    def remaining():
+        return max(0, TARBALL_BUDGET_SECONDS - int(time.time() - started))
 
     if not _have_aria2c():
         _install_aria2c()
-    if not _have_aria2c():
-        log("aria2c unavailable; falling back to urllib retries")
-        return _strategy_tarball_urllib()
 
-    for url in MIRRORS:
-        log(f"  aria2c -> {url}")
-        # 8 parallel connections, aggressive retries, resume across attempts.
-        # --lowest-speed-limit=51200  (50 KB/s per connection) drops stalled
-        # connections so aria2 opens a fresh one instead of hanging.
-        cmd = [
-            "aria2c",
-            "--max-connection-per-server=8",
-            "--split=8",
-            "--min-split-size=4M",
-            "--continue=true",
-            "--max-tries=50",
-            "--retry-wait=15",
-            "--timeout=60",
-            "--connect-timeout=30",
-            "--lowest-speed-limit=51200",
-            "--allow-overwrite=true",
-            "--auto-file-renaming=false",
-            "--console-log-level=warn",
-            "--summary-interval=30",
-            "--check-certificate=false",
-            "--dir", str(KERAS_DIR),
-            "--out", TARBALL_PATH.name,
-            url,
-        ]
-        try:
-            subprocess.run(cmd, check=False)
-        except FileNotFoundError:
-            break
+    if _have_aria2c() and remaining() > 30:
+        for url in MIRRORS:
+            budget = remaining()
+            if budget <= 30:
+                break
+            log(f"  aria2c (budget={budget}s) -> {url}")
+            # --lowest-speed-limit=51200 drops stalled connections so aria2
+            # opens a fresh one instead of hanging on a 0 B/s socket.
+            cmd = [
+                "aria2c",
+                "--max-connection-per-server=8",
+                "--split=8",
+                "--min-split-size=4M",
+                "--continue=true",
+                "--max-tries=5",
+                "--retry-wait=5",
+                "--timeout=30",
+                "--connect-timeout=15",
+                "--lowest-speed-limit=51200",
+                "--allow-overwrite=true",
+                "--auto-file-renaming=false",
+                "--console-log-level=warn",
+                "--summary-interval=30",
+                "--check-certificate=false",
+                "--dir", str(KERAS_DIR),
+                "--out", TARBALL_PATH.name,
+                url,
+            ]
+            try:
+                subprocess.run(cmd, check=False, timeout=budget)
+            except subprocess.TimeoutExpired:
+                log("  aria2c hit wall-clock budget; aborting.")
+                break
+            except FileNotFoundError:
+                break
 
-        if _tarball_looks_good():
-            log(f"  aria2c succeeded from {url}")
-            return _extract_tarball()
+            if _tarball_looks_good():
+                log(f"  aria2c succeeded from {url}")
+                return _extract_tarball()
 
+    # urllib fallback (only if budget remains). Uses per-request read timeout
+    # so we cannot get stuck on a stalled socket.
+    if remaining() > 30:
+        return _strategy_tarball_urllib(remaining())
+
+    log("  cs.toronto.edu strategy exhausted its wall-clock budget.")
     return False
 
 
-def _strategy_tarball_urllib():
-    """urllib fallback with byte-range resume, up to 20 attempts."""
-    log("Strategy 1b: urllib byte-range resume loop")
+def _strategy_tarball_urllib(budget_seconds):
+    """urllib fallback with byte-range resume, bounded by remaining wall time."""
+    log(f"  urllib fallback (budget={budget_seconds}s)")
+    started = time.time()
+
+    def remaining():
+        return max(0, budget_seconds - int(time.time() - started))
+
     for url in MIRRORS:
         for attempt in range(1, 21):
+            if remaining() <= 20:
+                log("  urllib hit wall-clock budget; aborting.")
+                return False
             existing = TARBALL_PATH.stat().st_size if TARBALL_PATH.exists() else 0
             if existing >= EXPECTED_SIZE:
                 break
-            log(f"  urllib attempt {attempt}/20 (resume from {existing} bytes) <- {url}")
+            log(f"  urllib attempt {attempt} (resume from {existing} bytes, {remaining()}s left) <- {url}")
             req = urllib.request.Request(url)
             if existing > 0:
                 req.add_header("Range", f"bytes={existing}-")
             try:
-                with urllib.request.urlopen(req, timeout=60) as resp:
+                # Short socket timeout so a stalled read raises quickly.
+                with urllib.request.urlopen(req, timeout=30) as resp:
                     mode = "ab" if existing > 0 and resp.status == 206 else "wb"
                     with open(TARBALL_PATH, mode) as out:
                         while True:
+                            if remaining() <= 5:
+                                break
                             chunk = resp.read(1 << 20)
                             if not chunk:
                                 break
                             out.write(chunk)
             except Exception as e:
                 log(f"  urllib attempt failed: {type(e).__name__}: {e}")
-                time.sleep(min(60, 5 * attempt))
+                time.sleep(min(10, 2 * attempt))
                 continue
             if _tarball_looks_good():
                 return _extract_tarball()
@@ -261,6 +297,8 @@ def write_keras_pickles(x_train, y_train, x_test, y_test):
 # ---------------------------------------------------------------------------
 def strategy_tfds():
     log("Strategy 2: tensorflow-datasets try_gcs=True (Google Cloud Storage)")
+    # Skip if TF is bulky to install and there's no network at all — we let
+    # pip fail loudly and move on.
     try:
         _pip_install(["tensorflow-datasets"])
         import tensorflow_datasets as tfds  # noqa: E402
@@ -281,7 +319,7 @@ def strategy_tfds():
 # Strategy 3: HuggingFace datasets uoft-cs/cifar10
 # ---------------------------------------------------------------------------
 def strategy_huggingface():
-    log("Strategy 3: HuggingFace datasets uoft-cs/cifar10")
+    log("Strategy 1: HuggingFace datasets uoft-cs/cifar10 (hf.co CDN)")
     try:
         _pip_install(["datasets", "pillow"])
         import numpy as np
@@ -334,7 +372,11 @@ def main():
         # Fall through and try to re-download if verification fails
         log("Existing files failed verification; re-fetching.")
 
-    strategies = [strategy_tarball, strategy_tfds, strategy_huggingface]
+    # ORDER MATTERS: put the fast, reliable-from-GH-Actions sources FIRST.
+    # cs.toronto.edu is a hostile source (throttles to 0 B/s) and is only
+    # tried after the fast paths fail. It also has a hard wall-clock cap so
+    # a stalled connection can't hang the whole workflow.
+    strategies = [strategy_huggingface, strategy_tfds, strategy_tarball]
     for i, strat in enumerate(strategies, start=1):
         log(f"--- Trying strategy {i}/{len(strategies)}: {strat.__name__} ---")
         try:
