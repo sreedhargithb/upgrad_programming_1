@@ -367,10 +367,9 @@ def main():
 
     if already_have_data():
         log("CIFAR-10 already present on disk; nothing to do.")
-        if verify_keras():
-            return 0
-        # Fall through and try to re-download if verification fails
-        log("Existing files failed verification; re-fetching.")
+        # Don't gate on verify_keras() — TF may not be installed in this job.
+        verify_keras()
+        return 0
 
     # ORDER MATTERS: put the fast, reliable-from-GH-Actions sources FIRST.
     # cs.toronto.edu is a hostile source (throttles to 0 B/s) and is only
@@ -380,9 +379,19 @@ def main():
     for i, strat in enumerate(strategies, start=1):
         log(f"--- Trying strategy {i}/{len(strategies)}: {strat.__name__} ---")
         try:
-            if strat() and verify_keras():
-                log(f"SUCCESS via {strat.__name__}")
-                return 0
+            if strat():
+                # Primary success criterion is "the 7 pickle files exist on disk".
+                # We intentionally do NOT gate on verify_keras() because the
+                # prepare job doesn't have tensorflow installed (only the
+                # chunk jobs do). Chunks will do the real verify when they
+                # call keras.datasets.cifar10.load_data() themselves.
+                if files_present(TARGET_DIR):
+                    log(f"SUCCESS via {strat.__name__} (files present on disk)")
+                    # Best-effort verify only — result is informational.
+                    verify_keras()
+                    return 0
+                else:
+                    log(f"  {strat.__name__} returned truthy but files still missing.")
         except Exception as e:
             log(f"Strategy {strat.__name__} raised: {type(e).__name__}: {e}")
 
