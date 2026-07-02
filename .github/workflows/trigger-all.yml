@@ -9,7 +9,10 @@ on:
         default: 'all'
 
 jobs:
-  # First job: list all scripts and create chunks
+  # First job: list all scripts and create chunks, and pre-warm shared datasets.
+  # Pre-warming here (rather than in every chunk) means the 170 MB CIFAR-10 tarball
+  # is fetched from upstream at most ONCE per cold cache — not 24 times in parallel.
+  # Subsequent runs restore from actions/cache in seconds.
   prepare:
     runs-on: ubuntu-latest
     outputs:
@@ -35,6 +38,52 @@ jobs:
             echo 'chunks=["${{ github.event.inputs.chunk }}"]' >> $GITHUB_OUTPUT
           fi
 
+      - name: Restore Keras datasets cache
+        id: cache-keras
+        uses: actions/cache/restore@v4
+        with:
+          path: ~/.keras
+          key: keras-datasets-v2-cifar10-mnist
+          restore-keys: |
+            keras-datasets-v2-
+            keras-datasets-
+
+      - name: Set up Python for pre-warm
+        if: steps.cache-keras.outputs.cache-hit != 'true'
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Pre-warm CIFAR-10 dataset (once, shared via cache)
+        if: steps.cache-keras.outputs.cache-hit != 'true'
+        env:
+          # Silence TF's noisy startup logging in the download script.
+          TF_CPP_MIN_LOG_LEVEL: "3"
+        run: |
+          # Delegate to a Python script that tries multiple sources in order:
+          #   1. Direct tarball via aria2c/urllib (cs.toronto.edu, throttled).
+          #   2. tensorflow-datasets try_gcs=True (Google Cloud Storage — fast).
+          #   3. HuggingFace uoft-cs/cifar10 (hf.co CDN — fast).
+          # Whichever wins, it writes the exact Keras pickle format to
+          # ~/.keras/datasets/cifar-10-batches-py/ so keras.datasets.cifar10
+          # short-circuits its own download on every chunk.
+          python .github/workflows/scripts/fetch_cifar10.py || {
+            echo "::warning::CIFAR-10 pre-warm failed after all strategies. Chunks depending on CIFAR-10 will attempt their own download and may time out."
+            # Don't fail the whole workflow — non-CIFAR scripts can still run.
+            exit 0
+          }
+          ls -la ~/.keras/datasets/cifar-10-batches-py/ || true
+
+      - name: Save Keras datasets to cache
+        # Only save when we actually have the extracted dataset. Prevents caching
+        # a partially-downloaded / empty ~/.keras that would then short-circuit
+        # every future run with a false cache hit.
+        if: steps.cache-keras.outputs.cache-hit != 'true' && hashFiles('~/.keras/datasets/cifar-10-batches-py/data_batch_1') != ''
+        uses: actions/cache/save@v4
+        with:
+          path: ~/.keras
+          key: keras-datasets-v2-cifar10-mnist
+
   # Run scripts in parallel chunks
   run-chunk:
     needs: prepare
@@ -58,8 +107,8 @@ jobs:
           sudo apt-get update
           sudo apt-get install -y graphviz
 
-      - name: Cache Keras datasets
-        uses: actions/cache@v4
+      - name: Restore Keras datasets from cache
+        uses: actions/cache/restore@v4
         with:
           path: ~/.keras
           key: keras-datasets-v2-cifar10-mnist
@@ -67,32 +116,14 @@ jobs:
             keras-datasets-v2-
             keras-datasets-
 
-      - name: Pre-warm CIFAR-10 dataset
+      - name: Verify CIFAR-10 available
         run: |
-          # keras.datasets.cifar10 pulls a 170 MB tarball from cs.toronto.edu, which
-          # aggressively throttles GitHub Actions IPs (~200 KB/s observed = ~14 min).
-          # Download it ONCE here (with a generous curl timeout) into the Keras cache;
-          # subsequent CI runs restore it from actions/cache in seconds.
-          mkdir -p ~/.keras/datasets
-          cd ~/.keras/datasets
-          if [ -f cifar-10-batches-py/data_batch_1 ] && [ -f cifar-10-batches-py/test_batch ]; then
-            echo "CIFAR-10 already cached (data_batch_1 + test_batch present) — skipping download."
-            ls -la cifar-10-batches-py/
+          if [ -f ~/.keras/datasets/cifar-10-batches-py/data_batch_1 ]; then
+            echo "CIFAR-10 restored from cache — CNN scripts will skip the upstream download."
+            du -sh ~/.keras/datasets/cifar-10-batches-py/
           else
-            echo "CIFAR-10 not cached — downloading from upstream (may take up to 15 minutes)..."
-            # 1200 s = 20 min hard cap on curl; enough headroom for the throttled server.
-            curl -sSL --max-time 1200 --retry 3 --retry-delay 10 \
-              -o cifar-10-python.tar.gz \
-              https://www.cs.toronto.edu/~kriz/cifar-10-python.tar.gz
-            echo "Download complete; extracting..."
-            tar -xzf cifar-10-python.tar.gz
-            rm cifar-10-python.tar.gz
-            ls -la cifar-10-batches-py/
-          fi
-          # Copy the tarball form that keras.utils.get_file expects as well, so if a
-          # future keras version re-checks for the archive it still finds it locally.
-          if [ ! -f cifar-10-batches-py.tar.gz ] && [ -d cifar-10-batches-py ]; then
-            tar -czf cifar-10-batches-py.tar.gz cifar-10-batches-py
+            echo "WARNING: CIFAR-10 not in cache. CNN scripts will each attempt to download it themselves"
+            echo "and likely time out due to cs.toronto.edu throttling GitHub Actions IPs."
           fi
 
       - name: Install dependencies
@@ -194,6 +225,13 @@ jobs:
             script_name=$(basename "$script")
             script_dir=$(dirname "$script")
             script_rel="${script#./}"
+            # Unique log filename derived from the full relative path so that
+            # 16 duplicate-basename scripts (5x readme.py, 4x _readme.py, 7x
+            # _0_readme.py) don't overwrite each other when copied into
+            # results/ or merged across chunk artifacts. Slashes -> "__",
+            # spaces/parens -> "_" to keep the name filesystem-safe.
+            script_slug=$(echo "$script_rel" | sed 's|/|__|g; s|[ ()]|_|g; s|\.py$||')
+            log_name="output_${script_slug}.log"
             
             echo "=============================================="
             echo "[$((i+1))/$total] Running: $script"
@@ -203,7 +241,7 @@ jobs:
               echo "SKIPPED (in skip list)"
               echo "SKIPPED (in skip list)" > "$script_dir/output_${script_name%.py}.log"
               skipped=$((skipped + 1))
-              cp "$script_dir/output_${script_name%.py}.log" "results/" 2>/dev/null || true
+              cp "$script_dir/output_${script_name%.py}.log" "results/${log_name}" 2>/dev/null || true
               echo "${chunk},$((i+1)),${script_rel},SKIPPED,0" >> "$status_file"
               continue
             fi
@@ -233,8 +271,8 @@ jobs:
             fi
             cd - > /dev/null
             
-            # Save output
-            cp "$script_dir/output_${script_name%.py}.log" "results/" 2>/dev/null || true
+            # Save output under the collision-safe slug name
+            cp "$script_dir/output_${script_name%.py}.log" "results/${log_name}" 2>/dev/null || true
             echo "${chunk},$((i+1)),${script_rel},${status_label},${rc}" >> "$status_file"
           done
           
