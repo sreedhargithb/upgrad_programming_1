@@ -7,9 +7,6 @@ name: "gcolab // CIFAR CNN chunks 9 and 10"
 # original .py file — see .github/workflows/scripts/py_to_ipynb.py.
 
 on:
-  push:
-    branches:
-      - main1
   workflow_dispatch:
   
 jobs:
