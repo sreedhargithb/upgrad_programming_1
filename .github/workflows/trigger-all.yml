@@ -55,30 +55,38 @@ jobs:
           python-version: '3.11'
 
       - name: Pre-warm CIFAR-10 dataset (once, shared via cache)
+        id: prewarm
         if: steps.cache-keras.outputs.cache-hit != 'true'
         env:
           # Silence TF's noisy startup logging in the download script.
           TF_CPP_MIN_LOG_LEVEL: "3"
         run: |
           # Delegate to a Python script that tries multiple sources in order:
-          #   1. Direct tarball via aria2c/urllib (cs.toronto.edu, throttled).
+          #   1. HuggingFace uoft-cs/cifar10 (hf.co CDN — fast).
           #   2. tensorflow-datasets try_gcs=True (Google Cloud Storage — fast).
-          #   3. HuggingFace uoft-cs/cifar10 (hf.co CDN — fast).
+          #   3. Direct tarball via aria2c/urllib (cs.toronto.edu, throttled, capped 6 min).
           # Whichever wins, it writes the exact Keras pickle format to
           # ~/.keras/datasets/cifar-10-batches-py/ so keras.datasets.cifar10
           # short-circuits its own download on every chunk.
-          python .github/workflows/scripts/fetch_cifar10.py || {
-            echo "::warning::CIFAR-10 pre-warm failed after all strategies. Chunks depending on CIFAR-10 will attempt their own download and may time out."
-            # Don't fail the whole workflow — non-CIFAR scripts can still run.
-            exit 0
-          }
-          ls -la ~/.keras/datasets/cifar-10-batches-py/ || true
+          rc=0
+          python .github/workflows/scripts/fetch_cifar10.py || rc=$?
+          if [ -f ~/.keras/datasets/cifar-10-batches-py/data_batch_1 ]; then
+            echo "success=true" >> "$GITHUB_OUTPUT"
+            echo "Pre-warm succeeded (data_batch_1 present on disk)."
+            ls -la ~/.keras/datasets/cifar-10-batches-py/ || true
+          else
+            echo "success=false" >> "$GITHUB_OUTPUT"
+            echo "::warning::CIFAR-10 pre-warm failed (rc=$rc, no data_batch_1). CNN chunks will attempt their own download and may time out."
+          fi
+          # Never fail the prepare job — non-CIFAR scripts can still run.
+          exit 0
 
       - name: Save Keras datasets to cache
-        # Only save when we actually have the extracted dataset. Prevents caching
-        # a partially-downloaded / empty ~/.keras that would then short-circuit
-        # every future run with a false cache hit.
-        if: steps.cache-keras.outputs.cache-hit != 'true' && hashFiles('~/.keras/datasets/cifar-10-batches-py/data_batch_1') != ''
+        # Gated on the pre-warm's own success output. hashFiles() can't be
+        # used here because it only resolves paths inside GITHUB_WORKSPACE,
+        # and ~/.keras lives in /home/runner outside the workspace — so
+        # hashFiles('~/.keras/...') always returns '' and would skip save.
+        if: steps.cache-keras.outputs.cache-hit != 'true' && steps.prewarm.outputs.success == 'true'
         uses: actions/cache/save@v4
         with:
           path: ~/.keras
