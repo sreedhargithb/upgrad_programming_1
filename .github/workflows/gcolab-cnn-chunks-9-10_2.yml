@@ -7,9 +7,6 @@ name: "gcolab // CIFAR CNN chunks 9 and 10"
 # original .py file — see .github/workflows/scripts/py_to_ipynb.py.
 
 on:
-  push:
-    branches:
-      - main1
   workflow_dispatch:
   
 jobs:
@@ -118,9 +115,7 @@ jobs:
           # "long"  -> try T4 GPU first, fall back to CPU
           # "short" -> CPU only (trivial print-only notebooks)
           entries=(
-            "2_Course_continuation/_2_Exam_2/4_Deep_learning/_3_Convolutional_Neural_networks/_2_Intro_to_CNN/Reading_Digital_Image.ipynb|short"
-            "2_Course_continuation/_2_Exam_2/4_Deep_learning/_3_Convolutional_Neural_networks/_3_Building_CNNs_with_Python_and_Keras/0_Building+a+CNN+_+MNIST_Copy1.ipynb|long"
-            "2_Course_continuation/_2_Exam_2/4_Deep_learning/_3_Convolutional_Neural_networks/_4_CNN_Architectures_and_Transfer_Learning/_0_readme.ipynb|short"
+            "2_Course_continuation/_2_Exam_2/4_Deep_learning/_3_Convolutional_Neural_networks/_3_Building_CNNs_with_Python_and_Keras/2_+Cifar_10_Notebook_with_BN_without_dropout.ipynb|long"
           )
 
           # ----- Per-slot worker (runs in a subshell, isolated credentials) -----
